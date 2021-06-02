@@ -24,11 +24,11 @@ public class CreateVenta extends JFrame {
 	private JTextField textField_2;
 	private JTextField textField_3;
 	private JTextField textField_4;
-	private JTextField textField_5;
 	private JTextField textField_6;
 	private JTextField textField_7;
 	private JTextField textField_8;
 	private JTextField textField_9;
+	private JTextField textField_5;
 
 	/**
 	 * Launch the application.
@@ -96,10 +96,6 @@ public class CreateVenta extends JFrame {
 		
 		JLabel lblTotal = new JLabel("Total");
 		
-		textField_5 = new JTextField();
-		textField_5.setEditable(false);
-		textField_5.setColumns(10);
-		
 		JButton btnAgregar = new JButton("Agregar");
 		
 		textField_6 = new JTextField();
@@ -124,12 +120,16 @@ public class CreateVenta extends JFrame {
 		JLabel lblCc = new JLabel("C.C ");
 		
 		JLabel lblTelfono = new JLabel("Tel\u00E9fono");
+		
+		textField_5 = new JTextField();
+		textField_5.setEditable(false);
+		textField_5.setColumns(10);
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap(10, Short.MAX_VALUE)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+					.addGap(10)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_contentPane.createSequentialGroup()
@@ -164,10 +164,10 @@ public class CreateVenta extends JFrame {
 									.addPreferredGap(ComponentPlacement.RELATED)
 									.addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 104, GroupLayout.PREFERRED_SIZE)
 									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(textField_5, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addGap(87)
-									.addComponent(btnAgregar)))
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+										.addComponent(textField_5, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
+										.addComponent(btnAgregar))))
+							.addGap(14)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addGap(18)
@@ -191,10 +191,11 @@ public class CreateVenta extends JFrame {
 												.addComponent(textField_8, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
 												.addComponent(textField_7, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
 												.addComponent(textField_9, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))))))
-							.addGap(236))
-						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+							.addGap(222))
+						.addGroup(gl_contentPane.createSequentialGroup()
 							.addComponent(btnVender, GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)
-							.addGap(347))))
+							.addGap(347)))
+					.addGap(0, 0, Short.MAX_VALUE))
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -227,8 +228,8 @@ public class CreateVenta extends JFrame {
 								.addComponent(lblCantidad))
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(textField_5, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblTotal))
+								.addComponent(lblTotal)
+								.addComponent(textField_5, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(23)
 							.addComponent(btnAgregar))
 						.addGroup(gl_contentPane.createSequentialGroup()
@@ -256,7 +257,7 @@ public class CreateVenta extends JFrame {
 								.addComponent(lblTelfono))))
 					.addGap(18)
 					.addComponent(btnVender)
-					.addContainerGap(30, Short.MAX_VALUE))
+					.addContainerGap(19, Short.MAX_VALUE))
 		);
 		
 		table = new JTable();
