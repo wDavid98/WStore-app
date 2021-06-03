@@ -14,4 +14,36 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>new Jars/jdbc-api-1.4.jar</name>
+			<type>1</type>
+			<location>D:/Mis Documentos/Documentos/GitHub/WStore-app/new Jars/jdbc-api-1.4.jar</location>
+		</link>
+		<link>
+			<name>new Jars/rs2xml.jar</name>
+			<type>1</type>
+			<location>D:/Mis Documentos/Documentos/GitHub/WStore-app/new Jars/rs2xml.jar</location>
+		</link>
+		<link>
+			<name>new Jars/sqlite-jdbc-3.27.2.1-javadoc.jar</name>
+			<type>1</type>
+			<location>D:/Mis Documentos/Documentos/GitHub/WStore-app/new Jars/sqlite-jdbc-3.27.2.1-javadoc.jar</location>
+		</link>
+		<link>
+			<name>new Jars/sqlite-jdbc-3.27.2.1-sources.jar</name>
+			<type>1</type>
+			<location>D:/Mis Documentos/Documentos/GitHub/WStore-app/new Jars/sqlite-jdbc-3.27.2.1-sources.jar</location>
+		</link>
+		<link>
+			<name>new Jars/sqlite-jdbc-3.27.2.1.jar</name>
+			<type>1</type>
+			<location>D:/Mis Documentos/Documentos/GitHub/WStore-app/new Jars/sqlite-jdbc-3.27.2.1.jar</location>
+		</link>
+		<link>
+			<name>new Jars/sqlite-jdbc-3.8.7.jar</name>
+			<type>1</type>
+			<location>D:/Mis Documentos/Documentos/GitHub/WStore-app/new Jars/sqlite-jdbc-3.8.7.jar</location>
+		</link>
+	</linkedResources>
 </projectDescription>

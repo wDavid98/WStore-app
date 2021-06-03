@@ -1,27 +1,30 @@
 import java.awt.BorderLayout;
+import java.lang.Object.*;
 import java.awt.EventQueue;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JLabel;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JButton;
-import java.awt.List;
-import java.awt.Choice;
-import javax.swing.JList;
-import javax.swing.AbstractListModel;
-import javax.swing.JComboBox;
+import java.sql.*;
+import javax.swing.*;
+import net.proteanit.sql.DbUtils;
 
+import javax.swing.border.EmptyBorder;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.LayoutStyle.ComponentPlacement;
+
+import java.awt.List;
+import java.awt.ScrollPane;
+import java.awt.Choice;
+import java.sql.*;
+import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 public class Inicio extends JFrame {
 
 	private JPanel contentPane;
-	private JTable table;
+	private JTable tableInventario;
 
 	/**
 	 * Launch the application.
@@ -42,7 +45,67 @@ public class Inicio extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	
+	// Variables propias de SQL
+	Connection conne = null;
+	PreparedStatement pst = null;	
+	ResultSet rs = null;
+	private JComboBox comboBoxInventario;
+	
+	//Método para actualizar tabla inventario
+	private void upDateTable() {
+		String comn1 = "select ID, nombre, precio_compra, precio_venta, cantidad from Producto";		
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();			
+			//Llenado de tabla
+			tableInventario.setModel(DbUtils.resultSetToTableModel(rs));
+			
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+		}		
+	}
+	
+	//Método para actualizar tabla inventario segun un nombre
+		private void searchNameinTable(String name) {
+			String comn1 = "select ID, nombre, precio_compra, precio_venta, cantidad from Producto where nombre="+"'"+name+"';";		
+			try {
+				pst = conne.prepareStatement(comn1);
+				rs = pst.executeQuery();			
+				//Llenado de tabla
+				tableInventario.setModel(DbUtils.resultSetToTableModel(rs));
+				
+			} catch (SQLException e) {
+				JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+			}		
+		}
+	
+	
+	//Método para actualizar popUp menu
+	private void upDatePopMenu()
+	{
+		String comn1 = "select nombre from Producto";
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();			
+			while(rs.next())
+			{
+				comboBoxInventario.addItem(rs.getString("nombre"));
+			}
+			
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+		}	
+	}
+	 
+	
+	
+	// Inicio del constructor	
 	public Inicio() {
+		
+		//Conección a SQLite
+		conne=sqliteconnection.dbconnector();		
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 883, 344);
 		contentPane = new JPanel();
@@ -67,7 +130,7 @@ public class Inicio extends JFrame {
 		
 		JLabel lblInventario_7 = new JLabel("----");
 		
-		JLabel lblInventario_2_1 = new JLabel("----");
+		JLabel lblRowSelected = new JLabel("----");
 		
 		JButton btnModificar = new JButton("Modificar");
 		
@@ -91,32 +154,51 @@ public class Inicio extends JFrame {
 		JButton btnModificar_6_1 = new JButton("Proveedores");
 		btnModificar_6_1.setEnabled(false);
 		
-		JScrollPane scrollPane_1 = new JScrollPane();
+		JScrollPane scrollPaneCombo = new JScrollPane();
 		
-		table = new JTable();
-		table.setModel(new DefaultTableModel(
+		tableInventario = new JTable();
+		tableInventario.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				JTable source = (JTable)evt.getSource();
+	            int row = source.rowAtPoint( evt.getPoint() );
+	            int column = source.columnAtPoint( evt.getPoint() );
+	            //String s=source.getModel().getValueAt(row, column)+"";
+	            //JOptionPane.showMessageDialog(null, s);
+	            lblRowSelected.setText(""+ source.getModel().getValueAt(row, 0) );
+			}
+		});
+		
+		tableInventario.setModel(new DefaultTableModel(
 			new Object[][] {
-				{null, null, null, null, null},
-				{null, null, null, null, null},
-				{null, null, null, null, null},
+				{new Integer(1), "Escoba", new Integer(800), new Integer(1200), new Integer(5)},
+				{new Integer(2), "Trapero", new Integer(800), new Integer(1500), new Integer(10)},
+				{new Integer(3), "Jabon de loza", new Integer(500), new Integer(2000), new Integer(22)},
+				{new Integer(4), "Cuaderno", new Integer(900), new Integer(1100), new Integer(1)},
+				{new Integer(5), "Trapero", new Integer(800), new Integer(1500), new Integer(125)},
+				{new Integer(6), "Jabon de loza", new Integer(500), new Integer(2000), new Integer(545)},
 			},
 			new String[] {
-				"New column", "New column", "New column", "New column", "New column"
+				"ID", "nombre", "precio_compra", "precio_venta", "Cantidad"
 			}
 		));
-		scrollPane.setViewportView(table);
+		tableInventario.getColumnModel().getColumn(0).setPreferredWidth(55);
+		tableInventario.getColumnModel().getColumn(1).setPreferredWidth(92);
+		tableInventario.getColumnModel().getColumn(2).setPreferredWidth(93);
+		tableInventario.getColumnModel().getColumn(3).setPreferredWidth(88);
+		scrollPane.setViewportView(tableInventario);
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(155)
 							.addComponent(lblInventario_1, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
 							.addGap(172)
 							.addComponent(lblInventario, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 184, GroupLayout.PREFERRED_SIZE))
+							.addPreferredGap(ComponentPlacement.RELATED, 157, Short.MAX_VALUE)
+							.addComponent(scrollPaneCombo, GroupLayout.PREFERRED_SIZE, 193, GroupLayout.PREFERRED_SIZE))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(10)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -150,12 +232,13 @@ public class Inicio extends JFrame {
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 435, GroupLayout.PREFERRED_SIZE)
 								.addGroup(gl_contentPane.createSequentialGroup()
-									.addComponent(lblInventario_2_1, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-									.addGap(43)
+									.addGap(25)
+									.addComponent(lblRowSelected, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
+									.addGap(18)
 									.addComponent(btnModificar, GroupLayout.PREFERRED_SIZE, 148, GroupLayout.PREFERRED_SIZE)
 									.addGap(11)
 									.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 148, GroupLayout.PREFERRED_SIZE)))))
-					.addContainerGap(10, Short.MAX_VALUE))
+					.addContainerGap())
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -168,7 +251,7 @@ public class Inicio extends JFrame {
 								.addComponent(lblInventario)))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addContainerGap()
-							.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)))
+							.addComponent(scrollPaneCombo, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
@@ -205,16 +288,26 @@ public class Inicio extends JFrame {
 							.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 192, GroupLayout.PREFERRED_SIZE)
 							.addGap(11)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addGap(4)
-									.addComponent(lblInventario_2_1))
-								.addComponent(btnModificar)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+									.addComponent(btnModificar)
+									.addComponent(lblRowSelected))
 								.addComponent(btnEliminar))))
 					.addGap(152))
 		);
 		
-		JComboBox comboBox = new JComboBox();
-		scrollPane_1.setViewportView(comboBox);
-		contentPane.setLayout(gl_contentPane);
+		comboBoxInventario = new JComboBox();				
+		scrollPaneCombo.setViewportView(comboBoxInventario);
+		contentPane.setLayout(gl_contentPane);		
+		upDateTable();
+		upDatePopMenu();
+		
+		
+		
+	} // Fin del constructor
+	
+	
+	
+	public JComboBox getComboBoxInventario() {
+		return comboBoxInventario;
 	}
 }
