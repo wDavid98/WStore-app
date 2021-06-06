@@ -21,6 +21,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
+import java.beans.VetoableChangeListener;
+import java.awt.event.InputMethodListener;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 public class Inicio extends JFrame {
 
 	private JPanel contentPane;
@@ -51,6 +60,11 @@ public class Inicio extends JFrame {
 	PreparedStatement pst = null;	
 	ResultSet rs = null;
 	private JComboBox comboBoxInventario;
+	private JTextField textNID;
+	private JTextField textPhone;
+	private JTextField textDir;
+	private JTextField TextNombre;
+	String oldNid;
 	
 	//Método para actualizar tabla inventario
 	private void upDateTable() {
@@ -83,13 +97,14 @@ public class Inicio extends JFrame {
 	
 	//Método para actualizar popUp menu
 	private void upDatePopMenu()
-	{
-		String comn1 = "select nombre from Producto";
+	{		
+		String comn1 = "select nombre from Producto";		
 		try {
 			pst = conne.prepareStatement(comn1);
 			rs = pst.executeQuery();			
+			comboBoxInventario.addItem("");
 			while(rs.next())
-			{
+			{				
 				comboBoxInventario.addItem(rs.getString("nombre"));
 			}
 			
@@ -99,6 +114,28 @@ public class Inicio extends JFrame {
 	}
 	 
 	
+	private void updateDatosNegocio()
+	{
+		String comn1 = "select * from DatosNegocio";		
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();			
+			TextNombre.setText(rs.getString("Nombre"));
+			textDir.setText(rs.getString("Direccion"));
+			textNID.setText(rs.getString("Nid"));
+			textPhone.setText(rs.getString("Telefono"));
+			oldNid = rs.getString("Nid");
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+		}	
+	}
+	
+	public String getNID()
+	{
+		return oldNid;
+	}
+	
+	private void setNid(String st) {oldNid = st;}
 	
 	// Inicio del constructor	
 	public Inicio() {
@@ -116,19 +153,11 @@ public class Inicio extends JFrame {
 		
 		JLabel lblInventario = new JLabel("INVENTARIO");
 		
-		JLabel lblInventario_1 = new JLabel("INVENTARIO");
-		
 		JLabel lblInventario_2 = new JLabel("DIRECCI\u00D3N");
 		
 		JLabel lblInventario_3 = new JLabel("NID");
 		
 		JLabel lblInventario_4 = new JLabel("TEL\u00C9FONO");
-		
-		JLabel lblInventario_5 = new JLabel("----");
-		
-		JLabel lblInventario_6 = new JLabel("-----");
-		
-		JLabel lblInventario_7 = new JLabel("----");
 		
 		JLabel lblRowSelected = new JLabel("----");
 		
@@ -136,12 +165,57 @@ public class Inicio extends JFrame {
 		
 		JButton btnEliminar = new JButton("Eliminar");
 		
-		JButton btnCompra = new JButton("Editar");
+		JButton btnEditData = new JButton("Editar");		
+		btnEditData.addMouseListener(new MouseAdapter() {
+			@Override			
+			public void mouseClicked(MouseEvent e) {				
+				if(btnEditData.getText() != "Editar")
+				{
+					JOptionPane.showMessageDialog(null,"Error al actualizar: "+oldNid);
+					String Dtname = TextNombre.getText();
+					String DtDir = textDir.getText();
+					String Dtph = textPhone.getText();
+					String Dtnid = textNID.getText();
+					int rsi;
+					String comn1 = "update DatosNegocio set Nombre='"+Dtname+"',NID='"+Dtnid+"',Telefono='"+Dtph+"',Direccion='"+DtDir+"' where NID ='"+getNID()+"';";	
+					try {
+						pst = conne.prepareStatement(comn1);
+						rsi = pst.executeUpdate();
+						setNid(textNID.getText());
+					}catch (SQLException e1) {
+						JOptionPane.showMessageDialog(null,"Error al actualizar: "+e1);
+					}						
+					btnEditData.setText("Editar");
+					TextNombre.setEditable(false);
+					textDir.setEditable(false);
+					textNID.setEditable(false);
+					textPhone.setEditable(false);
+				}
+				else
+				{
+					String oldNid = textNID.getText();
+					JOptionPane.showMessageDialog(null,"Error al actualizar: "+getNID());
+					btnEditData.setText("Guardar");
+					TextNombre.setEditable(true);
+					textDir.setEditable(true);
+					textNID.setEditable(true);
+					textPhone.setEditable(true);
+				}
+			}
+		});
+		
 		
 		JButton btnVentas = new JButton("Ventas");
 		btnVentas.setEnabled(false);
 		
 		JButton btnCompra_1 = new JButton("Compra");
+		btnCompra_1.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				CreateVenta pagVenta = new CreateVenta();
+				pagVenta.setVisible(true);
+			}
+		});
 		
 		JButton btnVenta = new JButton("Venta");
 		
@@ -187,39 +261,51 @@ public class Inicio extends JFrame {
 		tableInventario.getColumnModel().getColumn(2).setPreferredWidth(93);
 		tableInventario.getColumnModel().getColumn(3).setPreferredWidth(88);
 		scrollPane.setViewportView(tableInventario);
+		
+		textNID = new JTextField();
+		textNID.setEditable(false);
+		textNID.setText("------");
+		textNID.setColumns(10);
+		
+		textPhone = new JTextField();
+		textPhone.setEditable(false);
+		textPhone.setToolTipText("");
+		textPhone.setText("------");
+		textPhone.setColumns(10);
+		
+		textDir = new JTextField();
+		textDir.setText("------");
+		textDir.setEditable(false);
+		textDir.setToolTipText("");
+		textDir.setColumns(10);
+		
+		TextNombre = new JTextField();
+		TextNombre.setEditable(false);
+		TextNombre.setText("Nombre_Negocio");
+		TextNombre.setColumns(10);
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
 						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(155)
-							.addComponent(lblInventario_1, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-							.addGap(172)
+							.addGap(130)
+							.addComponent(TextNombre, GroupLayout.PREFERRED_SIZE, 132, GroupLayout.PREFERRED_SIZE)
+							.addGap(261)
 							.addComponent(lblInventario, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, 157, Short.MAX_VALUE)
-							.addComponent(scrollPaneCombo, GroupLayout.PREFERRED_SIZE, 193, GroupLayout.PREFERRED_SIZE))
+							.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(scrollPaneCombo, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(10)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addComponent(lblInventario_3, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-									.addGap(6)
-									.addComponent(lblInventario_5, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(textNID, GroupLayout.PREFERRED_SIZE, 132, GroupLayout.PREFERRED_SIZE))
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addComponent(lblInventario_4, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-									.addGap(6)
-									.addComponent(lblInventario_6, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE))
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addComponent(lblInventario_2, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-									.addGap(6)
-									.addComponent(lblInventario_7, GroupLayout.PREFERRED_SIZE, 111, GroupLayout.PREFERRED_SIZE))
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addComponent(btnCompra, GroupLayout.PREFERRED_SIZE, 75, GroupLayout.PREFERRED_SIZE)
-									.addGap(114)
-									.addComponent(btnCompra_1, GroupLayout.PREFERRED_SIZE, 95, GroupLayout.PREFERRED_SIZE)
-									.addGap(10)
-									.addComponent(btnVenta, GroupLayout.PREFERRED_SIZE, 102, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(textPhone, GroupLayout.PREFERRED_SIZE, 132, GroupLayout.PREFERRED_SIZE))
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addComponent(btnModificar_6, GroupLayout.PREFERRED_SIZE, 183, GroupLayout.PREFERRED_SIZE)
 									.addGap(6)
@@ -227,7 +313,20 @@ public class Inicio extends JFrame {
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addComponent(btnModificar_6_1, GroupLayout.PREFERRED_SIZE, 183, GroupLayout.PREFERRED_SIZE)
 									.addGap(6)
-									.addComponent(btnVentas, GroupLayout.PREFERRED_SIZE, 207, GroupLayout.PREFERRED_SIZE)))
+									.addComponent(btnVentas, GroupLayout.PREFERRED_SIZE, 207, GroupLayout.PREFERRED_SIZE))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
+										.addComponent(btnEditData, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(lblInventario_2, GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE))
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+										.addGroup(gl_contentPane.createSequentialGroup()
+											.addPreferredGap(ComponentPlacement.RELATED)
+											.addComponent(textDir, GroupLayout.PREFERRED_SIZE, 132, GroupLayout.PREFERRED_SIZE))
+										.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+											.addGap(104)
+											.addComponent(btnCompra_1, GroupLayout.PREFERRED_SIZE, 95, GroupLayout.PREFERRED_SIZE)
+											.addGap(10)
+											.addComponent(btnVenta, GroupLayout.PREFERRED_SIZE, 102, GroupLayout.PREFERRED_SIZE)))))
 							.addGap(6)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 435, GroupLayout.PREFERRED_SIZE)
@@ -243,39 +342,35 @@ public class Inicio extends JFrame {
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(21)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblInventario_1)
-								.addComponent(lblInventario)))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(scrollPaneCombo, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)))
+					.addContainerGap()
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+						.addComponent(TextNombre, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblInventario)
+						.addComponent(scrollPaneCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(12)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblInventario_3)
-								.addComponent(lblInventario_5))
+								.addComponent(textNID, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(15)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblInventario_4)
-								.addComponent(lblInventario_6))
+								.addComponent(textPhone, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(16)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblInventario_2)
-								.addComponent(lblInventario_7))
+								.addComponent(textDir, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(11)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(btnCompra)
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addGap(12)
 									.addComponent(btnCompra_1))
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addGap(12)
-									.addComponent(btnVenta)))
+									.addComponent(btnVenta))
+								.addComponent(btnEditData))
 							.addGap(18)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addComponent(btnModificar_6)
@@ -295,12 +390,41 @@ public class Inicio extends JFrame {
 					.addGap(152))
 		);
 		
-		comboBoxInventario = new JComboBox();				
+		comboBoxInventario = new JComboBox();	
+		comboBoxInventario.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(comboBoxInventario.getSelectedItem() == "")
+				{
+					upDateTable();	
+					comboBoxInventario.removeAllItems();
+					upDatePopMenu();
+				}
+				else
+				{
+					searchNameinTable(""+comboBoxInventario.getSelectedItem());
+					
+				}
+				
+			}
+		});
+		
+		
+		
+	
+		
+		
+		
+		
+		
+	
+		
+		
 		scrollPaneCombo.setViewportView(comboBoxInventario);
+		
 		contentPane.setLayout(gl_contentPane);		
 		upDateTable();
 		upDatePopMenu();
-		
+		updateDatosNegocio();
 		
 		
 	} // Fin del constructor
