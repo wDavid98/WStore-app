@@ -162,6 +162,36 @@ public class Inicio extends JFrame {
 		JLabel lblRowSelected = new JLabel("----");
 		
 		JButton btnModificar = new JButton("Modificar");
+		btnModificar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				String rwiD = lblRowSelected.getText();
+				if(rwiD!="")
+				{	
+					String nbr;
+					int pcom;
+					int pven;
+					int cnt;
+					//tableInventario.get
+					
+					/*
+					String comn1 = "select * from Productos ";		
+					try {
+						pst = conne.prepareStatement(comn1);
+						rs = pst.executeQuery();			
+						TextNombre.setText(rs.getString("Nombre"));
+						textDir.setText(rs.getString("Direccion"));
+						textNID.setText(rs.getString("Nid"));
+						textPhone.setText(rs.getString("Telefono"));
+						oldNid = rs.getString("Nid");
+					} catch (SQLException e) {
+						JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+					}	
+					*/
+				}				
+				
+			}
+		});
 		
 		JButton btnEliminar = new JButton("Eliminar");
 		
