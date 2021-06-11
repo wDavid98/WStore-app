@@ -1,30 +1,36 @@
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.sql.*;
+import javax.swing.*;
+import net.proteanit.sql.DbUtils;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JScrollPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.JButton;
+import javax.swing.table.TableModel;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class CreateCompra extends JFrame {
 
 	private JPanel contentPane;
-	private JTable table;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
+	private JTable tableCompra;
+	private JTextField textNombre;
+	private JTextField textPvent;
+	private JTextField textCmp;
+	private JTextField textCnt;
+	
+	private JComboBox cmboxInventario;	
+	
+	Object[] header = new Object[]{"Nombre","Precio_Comra","Precio_Venta","Cantidad"};
+	DefaultTableModel model = new DefaultTableModel(header, 0);
+	
+	
+	
 
 	/**
 	 * Launch the application.
@@ -41,6 +47,102 @@ public class CreateCompra extends JFrame {
 			}
 		});
 	}
+	
+	private void popUpUpdate()
+	{
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;	
+		ResultSet rs;
+		String comn1 = "select nombre from Producto";	
+		cmboxInventario.removeAllItems();				
+		try {					
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();
+			cmboxInventario.addItem("");
+			
+			while(rs.next())
+			{				
+				cmboxInventario.addItem(rs.getString("nombre"));				
+			}			
+			
+			rs.close();
+			pst.close();
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error popUpUpdate(): "+e);
+		}		
+	}
+	
+	private void dataFilling(int id)
+	{
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;	
+		ResultSet rs;
+		String comn1 = "select * from Producto where ID='"+id+"';";			
+		try {					
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();			
+			//-----
+			if(id != 0)
+			{
+			textNombre.setText(rs.getString("nombre"));
+			textCmp.setText(rs.getString("precio_compra"));
+			textPvent.setText(rs.getString("precio_venta"));
+			textCnt.setText(rs.getString("cantidad"));		
+			}
+			else
+			{
+				textNombre.setText("");
+				textCmp.setText("");
+				textPvent.setText("");
+				textCnt.setText("");		
+			}
+			//-----
+			rs.close();
+			pst.close();
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error dataFilling(): "+e);
+		}		
+		
+	}
+	
+	private int searchItemID(String name)
+	{
+		int id=0;
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;
+		ResultSet rs;
+		String comn1 = "select ID from Producto where nombre='"+name+"';";	
+		try {
+			if(name != "")
+			{
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();				
+			id = Integer.parseInt(rs.getString("ID"));			
+			rs.close();
+			pst.close();
+			}
+			else
+			{id=0;}
+		} catch (SQLException e) {
+			//JOptionPane.showMessageDialog(null,"Error searchItemID(): "+e);
+		}		
+		
+		return id;		
+	}
+	
+	/*Métodos
+	private void newProductInsert()
+	{
+		
+	}
+	
+	private void oldProductUpdate()
+	{
+		
+	}	
+	
+	
+	*/
 
 	/**
 	 * Create the frame.
@@ -56,9 +158,37 @@ public class CreateCompra extends JFrame {
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
 		
-		JCheckBox chckbxNewCheckBox = new JCheckBox("Producto Nuevo");
+		JCheckBox ckboxNewProduct = new JCheckBox("Producto Nuevo");
+		ckboxNewProduct.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(ckboxNewProduct.isSelected() != false)
+				{
+					cmboxInventario.setEnabled(false);
+					cmboxInventario.removeAllItems();															
+					textNombre.setEditable(true);
+					textCmp.setEditable(true);
+					textPvent.setEditable(true);
+					
+				}
+				else
+				{
+					
+					cmboxInventario.setEnabled(true);
+					popUpUpdate();
+					textNombre.setEditable(false);
+					textNombre.setText("");
+					textCmp.setEditable(false);
+					textCmp.setText("");
+					textPvent.setEditable(false);
+					textPvent.setText("");
+					
+				}
+				
+			}
+		});
 		
-		JLabel lblTipo = new JLabel("Tipo");
+		JLabel lblTipo = new JLabel("Nombre");
 		
 		JLabel lblPrecioVenta = new JLabel("Precio Venta");
 		
@@ -66,34 +196,49 @@ public class CreateCompra extends JFrame {
 		
 		JLabel lblCantidad = new JLabel("Cantidad");
 		
-		textField = new JTextField();
-		textField.setEnabled(false);
-		textField.setColumns(10);
+		textNombre = new JTextField();
+		textNombre.setEditable(false);
+		textNombre.setColumns(10);
 		
-		textField_1 = new JTextField();
-		textField_1.setEnabled(false);
-		textField_1.setColumns(10);
+		textPvent = new JTextField();
+		textPvent.setEditable(false);
+		textPvent.setColumns(10);
 		
-		textField_2 = new JTextField();
-		textField_2.setEnabled(false);
-		textField_2.setColumns(10);
+		textCmp = new JTextField();
+		textCmp.setEditable(false);
+		textCmp.setColumns(10);
 		
-		textField_3 = new JTextField();
-		textField_3.setColumns(10);
-		
-		JLabel lblDescripcin = new JLabel("Descripci\u00F3n");
-		
-		JTextPane textPane = new JTextPane();
+		textCnt = new JTextField();
+		textCnt.setColumns(10);
 		
 		JLabel lblCantidad_1 = new JLabel("TOTAL:");
 		
 		JLabel lblCantidad_2 = new JLabel("----");
 		
-		JLabel lblCantidad_1_1 = new JLabel("Cantidad");
+		JLabel lblCantidad_1_1 = new JLabel("----");
 		
 		JButton btnEliminar = new JButton("Eliminar");
 		
 		JButton btnGuardar = new JButton("GUARDAR");
+		
+		JButton btnAgregar = new JButton("Agregar");
+		btnAgregar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {	
+				try
+				{			
+				String nbr = textNombre.getText();
+				int pcom = Integer.parseInt(textCmp.getText());
+				int pvent = Integer.parseInt(textPvent.getText());
+				int cnt = Integer.parseInt(textCnt.getText());
+				model.addRow(new Object[]{nbr,pcom,pvent,cnt});	
+				tableCompra.setModel(model);	
+				}catch(Exception e)
+				{
+					JOptionPane.showMessageDialog(null,"Los precios y la cantidad deben ser numéricos");
+				}
+			}
+		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -101,7 +246,7 @@ public class CreateCompra extends JFrame {
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(85)
-							.addComponent(chckbxNewCheckBox))
+							.addComponent(ckboxNewProduct))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGap(23)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -111,18 +256,19 @@ public class CreateCompra extends JFrame {
 										.addComponent(lblCantidad, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 										.addComponent(lblPrecioCompra, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 										.addComponent(lblTipo, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(lblPrecioVenta, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
-										.addComponent(lblDescripcin, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE))
+										.addComponent(lblPrecioVenta, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE))
 									.addPreferredGap(ComponentPlacement.RELATED)
 									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-										.addComponent(textField_3, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-										.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-										.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-										.addComponent(textField, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)))
-								.addComponent(textPane, GroupLayout.PREFERRED_SIZE, 241, GroupLayout.PREFERRED_SIZE))))
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+										.addComponent(textCnt, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
+										.addComponent(textCmp, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
+										.addComponent(textPvent, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
+										.addComponent(textNombre, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)))))
 						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(26)
+							.addGap(89)
+							.addComponent(btnAgregar, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)))
+					.addPreferredGap(ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
+						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addComponent(lblCantidad_1_1, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)
@@ -134,38 +280,37 @@ public class CreateCompra extends JFrame {
 									.addComponent(lblCantidad_2, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE))
 								.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addContainerGap())
-						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
-							.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addGroup(gl_contentPane.createSequentialGroup()
 							.addComponent(btnGuardar, GroupLayout.PREFERRED_SIZE, 176, GroupLayout.PREFERRED_SIZE)
 							.addGap(138))))
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGap(23)
+					.addGap(32)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(chckbxNewCheckBox)
+							.addComponent(ckboxNewProduct)
 							.addGap(21)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblTipo)
-								.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addComponent(textNombre, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(19)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblPrecioVenta)
-								.addComponent(textField_1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addComponent(textPvent, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(18)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblPrecioCompra)
-								.addComponent(textField_2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addComponent(textCmp, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(18)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblCantidad)
-								.addComponent(textField_3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addComponent(textCnt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(18)
-							.addComponent(lblDescripcin))
+							.addComponent(btnAgregar))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 206, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
@@ -174,38 +319,36 @@ public class CreateCompra extends JFrame {
 								.addComponent(btnEliminar)
 								.addComponent(lblCantidad_2)
 								.addComponent(lblCantidad_1))))
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(textPane, GroupLayout.PREFERRED_SIZE, 81, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(25)
-							.addComponent(btnGuardar)))
-					.addContainerGap(30, Short.MAX_VALUE))
+					.addGap(16)
+					.addComponent(btnGuardar)
+					.addContainerGap(60, Short.MAX_VALUE))
 		);
 		
-		JComboBox comboBox = new JComboBox();
-		scrollPane_1.setViewportView(comboBox);
-		
-		table = new JTable();
-		table.setModel(new DefaultTableModel(
-			new Object[][] {
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-				{null, null, null, null, null, null},
-			},
-			new String[] {
-				"New column", "New column", "New column", "New column", "New column", "New column"
+		cmboxInventario = new JComboBox();
+		cmboxInventario.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(cmboxInventario.getSelectedItem() != "")
+				{
+					String itm = ""+cmboxInventario.getSelectedItem();
+					int id = searchItemID(itm);
+					dataFilling(id);
+					//JOptionPane.showMessageDialog(null,itm+"--"+id);
+				}						
 			}
+		});
+		cmboxInventario.setMaximumRowCount(1000);
+		scrollPane_1.setViewportView(cmboxInventario);
+		
+		popUpUpdate();
+		
+		tableCompra = new JTable();
+		tableCompra.setModel(new DefaultTableModel(
+				header,
+			0
 		));
-		scrollPane.setViewportView(table);
+		scrollPane.setViewportView(tableCompra);
 		contentPane.setLayout(gl_contentPane);
+		
+		
 	}
 }

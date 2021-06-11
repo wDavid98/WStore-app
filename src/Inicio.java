@@ -5,11 +5,15 @@ import java.awt.EventQueue;
 import java.sql.*;
 import javax.swing.*;
 import net.proteanit.sql.DbUtils;
+import sun.misc.GC;
 
 import javax.swing.border.EmptyBorder;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+
+import org.sqlite.SQLiteConnection;
+
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import java.awt.List;
@@ -30,10 +34,14 @@ import java.awt.event.InputMethodListener;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 public class Inicio extends JFrame {
 
 	private JPanel contentPane;
 	private JTable tableInventario;
+	
+	
 
 	/**
 	 * Launch the application.
@@ -55,40 +63,56 @@ public class Inicio extends JFrame {
 	 * Create the frame.
 	 */
 	
-	// Variables propias de SQL
-	Connection conne = null;
-	PreparedStatement pst = null;	
-	ResultSet rs = null;
+	// Variables propias de SQL		
+	
+	
+	
 	private JComboBox comboBoxInventario;
 	private JTextField textNID;
 	private JTextField textPhone;
 	private JTextField textDir;
 	private JTextField TextNombre;
-	String oldNid;
+	//Otras variables auxiliares
+	private String oldNid;
+	private String nbr_cl_ti;
+	private int pcom_cl_ti;
+	private int pvnt_cl_ti;
+	private int cnt_cl_ti;
 	
 	//Método para actualizar tabla inventario
 	private void upDateTable() {
+		PreparedStatement pst = null;	
+		ResultSet rs = null;
 		String comn1 = "select ID, nombre, precio_compra, precio_venta, cantidad from Producto";		
-		try {
+		try {	
+			Connection conne=sqliteconnection.dbconnector();
 			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();			
-			//Llenado de tabla
-			tableInventario.setModel(DbUtils.resultSetToTableModel(rs));
+			rs = pst.executeQuery();				
 			
+			//Llenado de tabla			
+			tableInventario.setModel(DbUtils.resultSetToTableModel(rs));	
+			
+			
+			rs.close();
+			pst.close();	
 		} catch (SQLException e) {
 			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
-		}		
+		}
 	}
 	
 	//Método para actualizar tabla inventario segun un nombre
 		private void searchNameinTable(String name) {
+			Connection conne=sqliteconnection.dbconnector();
+			PreparedStatement pst = null;	
+			ResultSet rs = null;
 			String comn1 = "select ID, nombre, precio_compra, precio_venta, cantidad from Producto where nombre="+"'"+name+"';";		
-			try {
+			try {		
 				pst = conne.prepareStatement(comn1);
 				rs = pst.executeQuery();			
 				//Llenado de tabla
 				tableInventario.setModel(DbUtils.resultSetToTableModel(rs));
-				
+				rs.close();
+				pst.close();
 			} catch (SQLException e) {
 				JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
 			}		
@@ -98,16 +122,21 @@ public class Inicio extends JFrame {
 	//Método para actualizar popUp menu
 	private void upDatePopMenu()
 	{		
-		String comn1 = "select nombre from Producto";		
-		try {
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst = null;	
+		ResultSet rs = null;
+		String comn1 = "select nombre from Producto";	
+		comboBoxInventario.removeAllItems();		
+		try {					
 			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();			
+			rs = pst.executeQuery();
 			comboBoxInventario.addItem("");
 			while(rs.next())
 			{				
 				comboBoxInventario.addItem(rs.getString("nombre"));
-			}
-			
+			}			
+			rs.close();
+			pst.close();
 		} catch (SQLException e) {
 			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
 		}	
@@ -116,18 +145,40 @@ public class Inicio extends JFrame {
 	
 	private void updateDatosNegocio()
 	{
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst = null;	
+		ResultSet rs = null;
 		String comn1 = "select * from DatosNegocio";		
-		try {
+		try {			
 			pst = conne.prepareStatement(comn1);
 			rs = pst.executeQuery();			
 			TextNombre.setText(rs.getString("Nombre"));
 			textDir.setText(rs.getString("Direccion"));
 			textNID.setText(rs.getString("Nid"));
 			textPhone.setText(rs.getString("Telefono"));
-			oldNid = rs.getString("Nid");
+			oldNid = rs.getString("Nid");	
+			rs.close();
+			pst.close();
 		} catch (SQLException e) {
 			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
 		}	
+		
+		/*finally {
+	        if(rs != null){
+	             try{
+	                  rs.close();
+	             } catch(Exception e){
+	                 e.printStackTrace();
+	             }
+	        }
+	        if(pst != null){
+	            try{
+	                pst.close();
+	            } catch(Exception e){
+	                e.printStackTrace();
+	            }
+	        }
+		}*/	
 	}
 	
 	public String getNID()
@@ -135,13 +186,52 @@ public class Inicio extends JFrame {
 		return oldNid;
 	}
 	
+	public String getNbr_byclick()
+	{
+		return nbr_cl_ti;
+	}
+	public void setNbr_byclick(String nn)
+	{
+		nbr_cl_ti = nn;	
+	}
+	
+	public int getPcom_byclick()
+	{
+		return pcom_cl_ti;
+	}
+	public void setPcom_byclick(int nn)
+	{
+		pcom_cl_ti = nn;	
+	}
+	
+	public int getPvent_byclick()
+	{
+		return pvnt_cl_ti;
+	}
+	public void setPvent_byclick(int nn)
+	{
+		pvnt_cl_ti = nn;	
+	}
+	
+	public int getCnt_byclick()
+	{
+		return cnt_cl_ti;
+	}
+	public void setCnt_byclick(int nn)
+	{
+		cnt_cl_ti = nn;	
+	}
+	
+	
+	
+	
 	private void setNid(String st) {oldNid = st;}
 	
 	// Inicio del constructor	
 	public Inicio() {
 		
-		//Conección a SQLite
-		conne=sqliteconnection.dbconnector();		
+		//Conexión a SQLite					
+					
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 883, 344);
@@ -167,28 +257,15 @@ public class Inicio extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				String rwiD = lblRowSelected.getText();
 				if(rwiD!="")
-				{	
-					String nbr;
-					int pcom;
-					int pven;
-					int cnt;
-					//tableInventario.get
+				{						
+					UpdateProduct pgUp_Prod = new UpdateProduct(Integer.parseInt(rwiD));	
+					pgUp_Prod.setVisible(true);							
+				}
+				else
+				{
 					
-					/*
-					String comn1 = "select * from Productos ";		
-					try {
-						pst = conne.prepareStatement(comn1);
-						rs = pst.executeQuery();			
-						TextNombre.setText(rs.getString("Nombre"));
-						textDir.setText(rs.getString("Direccion"));
-						textNID.setText(rs.getString("Nid"));
-						textPhone.setText(rs.getString("Telefono"));
-						oldNid = rs.getString("Nid");
-					} catch (SQLException e) {
-						JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
-					}	
-					*/
-				}				
+				}
+				upDateTable();
 				
 			}
 		});
@@ -196,25 +273,29 @@ public class Inicio extends JFrame {
 		JButton btnEliminar = new JButton("Eliminar");
 		
 		JButton btnEditData = new JButton("Editar");		
-		btnEditData.addMouseListener(new MouseAdapter() {
+		btnEditData.addMouseListener(new MouseAdapter() {			
 			@Override			
 			public void mouseClicked(MouseEvent e) {				
 				if(btnEditData.getText() != "Editar")
 				{
-					JOptionPane.showMessageDialog(null,"Error al actualizar: "+oldNid);
+					Connection conne=sqliteconnection.dbconnector();
+					PreparedStatement pst = null;						
 					String Dtname = TextNombre.getText();
 					String DtDir = textDir.getText();
 					String Dtph = textPhone.getText();
 					String Dtnid = textNID.getText();
-					int rsi;
+					int rsi = 0;
 					String comn1 = "update DatosNegocio set Nombre='"+Dtname+"',NID='"+Dtnid+"',Telefono='"+Dtph+"',Direccion='"+DtDir+"' where NID ='"+getNID()+"';";	
-					try {
+					try {						
 						pst = conne.prepareStatement(comn1);
-						rsi = pst.executeUpdate();
+						rsi = pst.executeUpdate();						
 						setNid(textNID.getText());
+						rsi=0;
+						pst.close();
+						JOptionPane.showMessageDialog(null,"Actualizado con éxito:");
 					}catch (SQLException e1) {
-						JOptionPane.showMessageDialog(null,"Error al actualizar: "+e1);
-					}						
+						
+					}					
 					btnEditData.setText("Editar");
 					TextNombre.setEditable(false);
 					textDir.setEditable(false);
@@ -223,8 +304,7 @@ public class Inicio extends JFrame {
 				}
 				else
 				{
-					String oldNid = textNID.getText();
-					JOptionPane.showMessageDialog(null,"Error al actualizar: "+getNID());
+					String oldNid = textNID.getText();					
 					btnEditData.setText("Guardar");
 					TextNombre.setEditable(true);
 					textDir.setEditable(true);
@@ -267,9 +347,11 @@ public class Inicio extends JFrame {
 				JTable source = (JTable)evt.getSource();
 	            int row = source.rowAtPoint( evt.getPoint() );
 	            int column = source.columnAtPoint( evt.getPoint() );
-	            //String s=source.getModel().getValueAt(row, column)+"";
-	            //JOptionPane.showMessageDialog(null, s);
 	            lblRowSelected.setText(""+ source.getModel().getValueAt(row, 0) );
+	            setNbr_byclick(""+ source.getModel().getValueAt(row, 1));
+	            setPcom_byclick((int)source.getModel().getValueAt(row, 2));
+	            setPvent_byclick((int)source.getModel().getValueAt(row, 3));
+	            setCnt_byclick((int)source.getModel().getValueAt(row, 4));
 			}
 		});
 		
@@ -432,7 +514,8 @@ public class Inicio extends JFrame {
 				else
 				{
 					searchNameinTable(""+comboBoxInventario.getSelectedItem());
-					
+					comboBoxInventario.removeAllItems();
+					upDatePopMenu();
 				}
 				
 			}
@@ -447,17 +530,19 @@ public class Inicio extends JFrame {
 		
 		
 	
-		
-		
+				
 		scrollPaneCombo.setViewportView(comboBoxInventario);
 		
 		contentPane.setLayout(gl_contentPane);		
 		upDateTable();
+		comboBoxInventario.removeAllItems();		
 		upDatePopMenu();
 		updateDatosNegocio();
 		
 		
-	} // Fin del constructor
+		
+		
+			} // Fin del constructor
 	
 	
 	
