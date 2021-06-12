@@ -25,8 +25,9 @@ public class CreateCompra extends JFrame {
 	private JTextField textCnt;
 	
 	private JComboBox cmboxInventario;	
+	private JLabel lblTotal;
 	
-	Object[] header = new Object[]{"Nombre","Precio_Comra","Precio_Venta","Cantidad"};
+	Object[] header = new Object[]{"Nombre","Precio_Compra","Precio_Venta","Cantidad","Total"};
 	DefaultTableModel model = new DefaultTableModel(header, 0);
 	
 	
@@ -47,6 +48,10 @@ public class CreateCompra extends JFrame {
 			}
 		});
 	}
+	
+	public void cerrarVentana() {		
+		this.setVisible(false); this.dispose();
+		}
 	
 	private void popUpUpdate()
 	{
@@ -86,8 +91,7 @@ public class CreateCompra extends JFrame {
 			{
 			textNombre.setText(rs.getString("nombre"));
 			textCmp.setText(rs.getString("precio_compra"));
-			textPvent.setText(rs.getString("precio_venta"));
-			textCnt.setText(rs.getString("cantidad"));		
+			textPvent.setText(rs.getString("precio_venta"));					
 			}
 			else
 			{
@@ -130,25 +134,103 @@ public class CreateCompra extends JFrame {
 		return id;		
 	}
 	
-	/*Métodos
-	private void newProductInsert()
+	
+	private void sumaTotal()
 	{
+		//Genera la suma de la columna total, para generar el valor de la compra.
+		int sum = 0;
+		int i = 0;
+		while(i<model.getRowCount())
+		{
+			sum += Integer.parseInt(model.getValueAt(i, 4).toString());
+			i++;
+		}
+		
+		lblTotal.setText(""+sum);
+	}
+	
+	private void BuynewProduct(String name, int pcom, int pvent, int cant)
+	{
+		//Añade un producto nuevo a la base de datos, tabla Producto
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;
+		int rs;
+		String comn1 = "Insert into Producto(nombre,precio_compra,precio_venta,cantidad) values('"+name+"','"+pcom+"','"+pvent+"','"+cant+"');";	
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeUpdate();	
+			rs=0;
+			pst.close();
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error BuynewProduct(): "+e);
+		}		
+	}
+	
+	
+	private void BuyoldProduct(String name, int cant)
+	{
+		/*Si el nombre ya existe en la base de datos, actualiza su cantidad añadienola a la que ya había
+		No permite modificaciones de otros atributos, por lo que o se agrega el mismo producto con otro nombre, o se modifica directamente
+		desde la pastalla principal*/
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;
+		int rs;
+		String comn1 = "update Producto set cantidad='"+cant+"' where nombre='"+name+"';";
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeUpdate();					
+			rs=0;
+			pst.close();
+		} catch (SQLException e) {JOptionPane.showMessageDialog(null,"Error BuyoldProduct(): "+e);}
 		
 	}
 	
-	private void oldProductUpdate()
+	private int getCurrentCuantity(String name)
 	{
+		int cnt = 0;
+		String comn1 = "select cantidad from Producto where nombre='"+name+"';";			
+		try {	
+			Connection conne=sqliteconnection.dbconnector();
+			PreparedStatement pst;
+			ResultSet rs;
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();			
+			//-----			
+			cnt = Integer.parseInt(rs.getString("cantidad").toString());
+			//-----			
+			rs.close();
+			pst.close();			
+		}catch(Exception e) {}
+		return cnt;
+	}
+	
+	private boolean searchProduct(String name)
+	{
+		//Revisa si el producto existe en la tabla Producto, retornando true si lo encuentra, false si no.
+		boolean fnd = false;
+		Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;
+		ResultSet rs;
+		String comn1 = "select * from Producto where nombre='"+name+"';";	
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();				
+			if(rs.next())
+			{
+				fnd=true;
+			}			
+			rs.close();
+			pst.close();
+		} catch (SQLException e) {}
 		
-	}	
-	
-	
-	*/
+		return fnd;
+	}
 
 	/**
 	 * Create the frame.
 	 */
 	public CreateCompra() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 778, 435);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -168,8 +250,7 @@ public class CreateCompra extends JFrame {
 					cmboxInventario.removeAllItems();															
 					textNombre.setEditable(true);
 					textCmp.setEditable(true);
-					textPvent.setEditable(true);
-					
+					textPvent.setEditable(true);					
 				}
 				else
 				{
@@ -213,13 +294,58 @@ public class CreateCompra extends JFrame {
 		
 		JLabel lblCantidad_1 = new JLabel("TOTAL:");
 		
-		JLabel lblCantidad_2 = new JLabel("----");
+		lblTotal = new JLabel("----");
 		
-		JLabel lblCantidad_1_1 = new JLabel("----");
+		JLabel lblSelRow = new JLabel("----");
 		
 		JButton btnEliminar = new JButton("Eliminar");
+		btnEliminar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				model.removeRow(Integer.parseInt(lblSelRow.getText()));		
+				tableCompra.setModel(model);
+				sumaTotal();
+			}
+		});
 		
 		JButton btnGuardar = new JButton("GUARDAR");
+		btnGuardar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				int nrow = model.getRowCount();
+				int i = 0;
+				int cnnew = 0;
+				int cnold = 0;
+				try {
+					while(i<model.getRowCount())
+					{
+						String name = model.getValueAt(i, 0).toString();
+						int pcom = Integer.parseInt(model.getValueAt(i, 1).toString());
+						int pven = Integer.parseInt(model.getValueAt(i, 2).toString());
+						int cnt = Integer.parseInt(model.getValueAt(i, 3).toString());						
+						boolean fnd = searchProduct(name);						
+						if(!fnd)
+						{
+							BuynewProduct(name, pcom, pven, cnt);
+							cnnew++;
+						}
+						else
+						{
+							int ncn = getCurrentCuantity(name)+cnt;
+							BuyoldProduct(name, ncn);
+							cnold++;
+						}
+						i++;
+					}
+					JOptionPane.showMessageDialog(null, "Productos nuevos: "+cnnew+", Producto actualizados: "+cnold);
+					cerrarVentana();
+				}catch(Exception e)
+				{
+					JOptionPane.showMessageDialog(null, "Tabla vacia - "+e);
+				}
+				
+			}
+		});
 		
 		JButton btnAgregar = new JButton("Agregar");
 		btnAgregar.addMouseListener(new MouseAdapter() {
@@ -231,8 +357,12 @@ public class CreateCompra extends JFrame {
 				int pcom = Integer.parseInt(textCmp.getText());
 				int pvent = Integer.parseInt(textPvent.getText());
 				int cnt = Integer.parseInt(textCnt.getText());
-				model.addRow(new Object[]{nbr,pcom,pvent,cnt});	
+				int tot = pcom*cnt;
+				model.addRow(new Object[]{nbr,pcom,pvent,cnt,tot});	
 				tableCompra.setModel(model);	
+				
+				sumaTotal();
+				
 				}catch(Exception e)
 				{
 					JOptionPane.showMessageDialog(null,"Los precios y la cantidad deben ser numéricos");
@@ -271,13 +401,13 @@ public class CreateCompra extends JFrame {
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_contentPane.createSequentialGroup()
-									.addComponent(lblCantidad_1_1, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)
+									.addComponent(lblSelRow, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)
 									.addPreferredGap(ComponentPlacement.RELATED)
 									.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
 									.addGap(69)
 									.addComponent(lblCantidad_1, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)
 									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(lblCantidad_2, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE))
+									.addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE))
 								.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addContainerGap())
 						.addGroup(gl_contentPane.createSequentialGroup()
@@ -315,9 +445,9 @@ public class CreateCompra extends JFrame {
 							.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 206, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblCantidad_1_1)
+								.addComponent(lblSelRow)
 								.addComponent(btnEliminar)
-								.addComponent(lblCantidad_2)
+								.addComponent(lblTotal)
 								.addComponent(lblCantidad_1))))
 					.addGap(16)
 					.addComponent(btnGuardar)
@@ -342,10 +472,15 @@ public class CreateCompra extends JFrame {
 		popUpUpdate();
 		
 		tableCompra = new JTable();
-		tableCompra.setModel(new DefaultTableModel(
-				header,
-			0
-		));
+		tableCompra.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				JTable source = (JTable)evt.getSource();
+	            int row = source.rowAtPoint( evt.getPoint() );	            
+	            lblSelRow.setText(""+ row );
+			}
+		});
+		tableCompra.setModel(model);
 		scrollPane.setViewportView(tableCompra);
 		contentPane.setLayout(gl_contentPane);
 		

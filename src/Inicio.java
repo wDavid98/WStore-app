@@ -161,24 +161,8 @@ public class Inicio extends JFrame {
 			pst.close();
 		} catch (SQLException e) {
 			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
-		}	
+		}			
 		
-		/*finally {
-	        if(rs != null){
-	             try{
-	                  rs.close();
-	             } catch(Exception e){
-	                 e.printStackTrace();
-	             }
-	        }
-	        if(pst != null){
-	            try{
-	                pst.close();
-	            } catch(Exception e){
-	                e.printStackTrace();
-	            }
-	        }
-		}*/	
 	}
 	
 	public String getNID()
@@ -322,8 +306,8 @@ public class Inicio extends JFrame {
 		btnCompra_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				CreateVenta pagVenta = new CreateVenta();
-				pagVenta.setVisible(true);
+				CreateCompra pagCompra = new CreateCompra();
+				pagCompra.setVisible(true);
 			}
 		});
 		
