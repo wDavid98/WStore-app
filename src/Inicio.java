@@ -312,6 +312,13 @@ public class Inicio extends JFrame {
 		});
 		
 		JButton btnVenta = new JButton("Venta");
+		btnVenta.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				CreateVenta pagVnt = new CreateVenta();
+				pagVnt.setVisible(true);
+			}
+		});
 		
 		JButton btnContabilidad = new JButton("Contabilidad");
 		btnContabilidad.setEnabled(false);

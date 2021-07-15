@@ -6,6 +6,7 @@ import javax.swing.*;
 import net.proteanit.sql.DbUtils;
 
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.MouseAdapter;
@@ -23,6 +24,8 @@ public class UpdateProduct extends JFrame {
 	private JTextField textPven;
 	private JTextField textCnt;
 	
+	
+
 		
 	
 
