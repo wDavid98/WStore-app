@@ -3,6 +3,8 @@ import java.lang.Object.*;
 import java.awt.EventQueue;
 
 import java.sql.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import net.proteanit.sql.DbUtils;
 import sun.misc.GC;
@@ -79,24 +81,21 @@ public class Inicio extends JFrame {
 	private int pvnt_cl_ti;
 	private int cnt_cl_ti;
 	
+	//Variables de clase
+	Inventario inventerio = new Inventario();
+	
+	//Variables de tabla
+	Object[] header = new Object[]{"ID","Nombre","Precio_Compra","Precio_Venta","Cantidad","Vence"};
+	DefaultTableModel model = new DefaultTableModel(header, 0);
+	
 	//Método para actualizar tabla inventario
-	private void upDateTable() {
-		PreparedStatement pst = null;	
-		ResultSet rs = null;
-		String comn1 = "select ID, nombre, precio_compra, precio_venta, cantidad from Producto";		
-		try {	
-			Connection conne=sqliteconnection.dbconnector();
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();				
-			
-			//Llenado de tabla			
-			tableInventario.setModel(DbUtils.resultSetToTableModel(rs));	
-			
-			
-			rs.close();
-			pst.close();	
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+		private void upDateTable() {
+		ArrayList<Producto> rs = null;
+		rs = inventerio.mostrarProductos();
+		for(Producto prod : rs)
+		{
+			model.addRow(new Object[]{prod.getID(),prod.getNombre(),prod.getPrecio_Compra(),prod.getPrecio_Venta(),prod.getStock()});	
+			tableInventario.setModel(model);
 		}
 	}
 	
@@ -114,7 +113,7 @@ public class Inicio extends JFrame {
 				rs.close();
 				pst.close();
 			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+				JOptionPane.showMessageDialog(null,"Error al llenar la tabla -2: "+e);
 			}		
 		}
 	
@@ -138,7 +137,7 @@ public class Inicio extends JFrame {
 			rs.close();
 			pst.close();
 		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+			JOptionPane.showMessageDialog(null,"Error al llenar la tabla - 3: "+e);
 		}	
 	}
 	 
@@ -151,16 +150,23 @@ public class Inicio extends JFrame {
 		String comn1 = "select * from DatosNegocio";		
 		try {			
 			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();			
-			TextNombre.setText(rs.getString("Nombre"));
-			textDir.setText(rs.getString("Direccion"));
-			textNID.setText(rs.getString("Nid"));
-			textPhone.setText(rs.getString("Telefono"));
-			oldNid = rs.getString("Nid");	
+			rs = pst.executeQuery();		
+			if(rs!=null)
+			{
+				
+			}
+			else
+			{
+				TextNombre.setText(rs.getString("Nombre"));
+				textDir.setText(rs.getString("Direccion"));
+				textNID.setText(rs.getString("Nid"));
+				textPhone.setText(rs.getString("Telefono"));
+				oldNid = rs.getString("Nid");
+			}
 			rs.close();
 			pst.close();
 		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"Error al llenar la tabla: "+e);
+			JOptionPane.showMessageDialog(null,"Error al llenar la tabla - 4: "+e);
 		}			
 		
 	}
@@ -348,21 +354,16 @@ public class Inicio extends JFrame {
 		
 		tableInventario.setModel(new DefaultTableModel(
 			new Object[][] {
-				{new Integer(1), "Escoba", new Integer(800), new Integer(1200), new Integer(5)},
-				{new Integer(2), "Trapero", new Integer(800), new Integer(1500), new Integer(10)},
-				{new Integer(3), "Jabon de loza", new Integer(500), new Integer(2000), new Integer(22)},
-				{new Integer(4), "Cuaderno", new Integer(900), new Integer(1100), new Integer(1)},
-				{new Integer(5), "Trapero", new Integer(800), new Integer(1500), new Integer(125)},
-				{new Integer(6), "Jabon de loza", new Integer(500), new Integer(2000), new Integer(545)},
 			},
 			new String[] {
-				"ID", "nombre", "precio_compra", "precio_venta", "Cantidad"
+				"ID", "nombre", "precio_compra", "precio_venta", "Cantidad","Vence"
 			}
 		));
 		tableInventario.getColumnModel().getColumn(0).setPreferredWidth(55);
 		tableInventario.getColumnModel().getColumn(1).setPreferredWidth(92);
 		tableInventario.getColumnModel().getColumn(2).setPreferredWidth(93);
 		tableInventario.getColumnModel().getColumn(3).setPreferredWidth(88);
+		tableInventario.getColumnModel().getColumn(4).setPreferredWidth(88);
 		scrollPane.setViewportView(tableInventario);
 		
 		textNID = new JTextField();
@@ -525,7 +526,7 @@ public class Inicio extends JFrame {
 		scrollPaneCombo.setViewportView(comboBoxInventario);
 		
 		contentPane.setLayout(gl_contentPane);		
-		upDateTable();
+		//upDateTable();
 		comboBoxInventario.removeAllItems();		
 		upDatePopMenu();
 		updateDatosNegocio();
