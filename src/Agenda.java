@@ -1,5 +1,11 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import javax.swing.JOptionPane;
 /**
  * Write a description of class Agenda here.
  * 
@@ -31,46 +37,79 @@ public class Agenda
         return clientes;
     }
 
-    public void showProveedores()
+    public ArrayList<Proveedor> showProveedores()
     { 
-        if(proveedores.size()>0)    
-        {
-            System.out.println("NIT |   Nombre  |   Telefono    |   Dirección");
-            for(Proveedor prov : proveedores)
-            {
-                System.out.print(prov.getNID()+"  |   ");
-                System.out.print(prov.getNombre()+"  |   ");
-                System.out.print(prov.getTelefono()+"  |   ");
-                System.out.println(prov.getDireccion()+"  |   ");
-            }  
-        }
-        else
-        {
-            System.out.println("-----------------");
-            System.out.println("No existen proveedores");
-            System.out.println("-----------------");
-        }
+    	//Comandos para consulta SQL
+    	proveedores.clear();
+		PreparedStatement pst = null;	
+		ResultSet rs = null;
+		String comn1 = "select nombre, telefono, direccion, NID from Proveedor";		
+		try {	
+			Connection conne=sqliteconnection.dbconnector();
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();	
+			
+			while(rs.next())
+			{				
+				Proveedor prov = new Proveedor(rs.getInt(4),rs.getString(1),rs.getInt(2),rs.getString(3));
+				proveedores.add(prov);
+			}	
+			rs.close();
+			pst.close();	
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error al llenar la tabla - 1: "+e);
+		}
+		return proveedores;
     }
     
-    public void showClientes()
+    public Proveedor buscarProveedorbyName(String name)
     {
-         if(clientes.size()>0)    
-        {
-            System.out.println("CC |   Nombre  |   Telefono    |   Dirección");
-            for(Cliente prov : clientes)
-            {
-                System.out.print(prov.getCC()+"  |   ");
-                System.out.print(prov.getNombre()+"  |   ");
-                System.out.print(prov.getTelefono()+"  |   ");
-                System.out.println(prov.getDireccion()+"  |   ");
-            }  
-        }
-        else
-        {
-            System.out.println("-----------------");
-            System.out.println("No existen clientes");
-            System.out.println("-----------------");
-        }
+    	Proveedor prov = null;
+    	PreparedStatement pst = null;	
+		ResultSet rs = null;
+		String comn1 = "select * from Proveedor where nombre='"+name+"';";	
+		try {	
+			Connection conne=sqliteconnection.dbconnector();
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();
+			//---------
+			
+			prov = new Proveedor(rs.getInt("NID"),rs.getString("nombre"),rs.getInt("telefono"),rs.getString("direccion"));
+			
+			//---------
+			rs.close();
+			pst.close();	
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error obtener datos del proveedor");
+		}
+    	
+    	
+    	return prov;
+    }
+    
+    public ArrayList<Cliente> showClientes()
+    {
+    	//Comandos para consulta SQL
+    	clientes.clear();
+		PreparedStatement pst = null;	
+		ResultSet rs = null;
+		String comn1 = "select CC, nombre, telefono, direccion from Cliente";		
+		try {	
+			Connection conne=sqliteconnection.dbconnector();
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeQuery();	
+			
+			while(rs.next())
+			{				
+				Cliente cli = new Cliente(rs.getInt(1),rs.getString(2),rs.getInt(3),rs.getString(4));		
+				clientes.add(cli);
+			}	
+			rs.close();
+			pst.close();	
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error al llenar la tabla - 1: "+e);
+		}
+		return clientes;
     }
     
     public void addProveedor(Proveedor prov) //Método temporar
@@ -97,8 +136,9 @@ public class Agenda
     
     public Cliente buscarCliente(int id)
     {
-        Cliente cln = null;
-        for(Cliente pro : clientes)
+    	Cliente cln = null;
+    	ArrayList<Cliente> clients = showClientes();
+        for(Cliente pro : clients)
         {
             if(pro.getCC() == id)
             {
@@ -111,7 +151,8 @@ public class Agenda
     public Proveedor buscarProveedor(int nd)
     {
         Proveedor prov = null;
-        for(Proveedor pro : proveedores)
+        ArrayList<Proveedor> provs = showProveedores();
+        for(Proveedor pro : provs)
         {
             if(pro.getNID() == nd)
             {
@@ -124,7 +165,8 @@ public class Agenda
     public boolean existeCliente(int cc)    
     {
         boolean fnd = false;
-        for(Cliente pro : clientes) 
+        ArrayList<Cliente> clients = showClientes();
+        for(Cliente pro : clients) 
         {
             if(pro.getCC() == cc)
             {
@@ -137,7 +179,8 @@ public class Agenda
     public boolean existeProveedor(int nid)
     {
         boolean fnd = false;
-        for(Proveedor pro : proveedores)    
+        ArrayList<Proveedor> provs = showProveedores();
+        for(Proveedor pro : provs)    
         {
             if(pro.getNID() == nid)
             {
@@ -147,6 +190,7 @@ public class Agenda
         return fnd;
     }
     
+    /*
     public ArrayList<Cliente> getClientes()
     {
         return clientes;
@@ -156,10 +200,11 @@ public class Agenda
     {
         return proveedores;
     }
+    */
     
     public void modificarCliente(int cc, String nNmb,int telf,String dir)
     {
-        if(nNmb =="+"){}
+       if(nNmb =="+"){}
        else 
        {
            buscarCliente(cc).setNombre(nNmb);

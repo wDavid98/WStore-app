@@ -2,6 +2,9 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.sql.*;
+import net.proteanit.sql.DbUtils;
+import javax.swing.*;
 /**
  * Write a description of class Historial here.
  * 
@@ -49,10 +52,34 @@ public class Historial
         Compra compra = new Compra(idCpr,date,cprs);
         return compra;
     }
+    
     public void agregarCompra(Compra compra)
     {
-        compras.add(compra);    
-        idCompra++;
+    	Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;
+		int rs;
+		Date date = compra.getFecha();
+		HashMap<Producto,Integer> prods = compra.getProductos();
+		Integer idprov;
+		if(compra.getProveedor()== null)
+		{
+			idprov = null;
+		}
+		else
+		{
+			idprov = compra.getProveedor().getNID();
+		}		 
+		int tot = compra.getTotal();
+		
+		String comn1 = "Insert into Compra(fecha,productos,id_proveedor,total) values('"+date+"','"+prods+"','"+idprov+"','"+tot+"');";	
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeUpdate();	
+			rs=0;
+			pst.close();
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error BuynewProduct(): "+e);
+		}	
     }
     
     public int getIDCompra()

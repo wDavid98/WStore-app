@@ -2,6 +2,8 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.sql.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import net.proteanit.sql.DbUtils;
 
@@ -52,23 +54,21 @@ public class UpdateProduct extends JFrame {
 	//Método para llenar la info
 	private void fillData(int idPrd)
 	{
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst = null;	
-		ResultSet rs = null;
-		String comn1 = "select * from Producto where ID='"+idPrd+"';";		
-		try {					
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();
-			textID.setText(rs.getString("ID"));
-			textNbr.setText(rs.getString("nombre"));
-			textPcom.setText(rs.getString("precio_compra"));
-			textPven.setText(rs.getString("precio_venta"));
-			textCnt.setText(rs.getString("cantidad"));	
-			rs.close();
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"No existe este ID: "+idPrd);
+		Inventario inventario = new Inventario();
+		ArrayList<Producto> rs = null;
+		rs = inventario.mostrarProductos();
+		for(Producto prod : rs)
+		{
+			if(prod.getID()==idPrd)
+			{
+				textID.setText(""+prod.getID());
+				textNbr.setText(""+prod.getNombre());
+				textPcom.setText(""+prod.getPrecio_Compra());
+				textPven.setText(""+prod.getPrecio_Venta());
+				textCnt.setText(""+prod.getStock());	
+			}
 		}
+		
 	}
 
 	/**
@@ -101,20 +101,13 @@ public class UpdateProduct extends JFrame {
 		btnActualizar.addMouseListener(new MouseAdapter() {			
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				Connection conne=sqliteconnection.dbconnector();
-				PreparedStatement pst = null;			
-				int rsu=0;				
-				String comn1 = "update Producto set nombre='"+textNbr.getText()+"',precio_compra='"+textPcom.getText()+"',precio_venta='"+textPven.getText()+"',cantidad='"+textCnt.getText()+"' where ID='"+idProd+"';";	
-				try {
-					
-					pst = conne.prepareStatement(comn1);
-					rsu = pst.executeUpdate();
-					JOptionPane.showMessageDialog(null,"Guardado con éxito");
-					rsu = 0;
-					pst.close();
-				}catch (SQLException e1) {
-					JOptionPane.showMessageDialog(null,"Error al actualizar: "+e1+"--"+textNbr.getText()+"--"+textPcom.getText()+"--"+idProd);
-				}
+				Inventario inventario = new Inventario();
+				int id = Integer.parseInt(textID.getText());
+				String nNmb = textNbr.getText();
+				int nPvnt = Integer.parseInt(textPven.getText());
+				int nPcm = Integer.parseInt(textPcom.getText());
+				int nStk = Integer.parseInt(textCnt.getText());
+				inventario.ModificarProducto(id, nNmb, nPcm, nPvnt, nStk);						
 				cerrarVentana();	
 			}
 		});

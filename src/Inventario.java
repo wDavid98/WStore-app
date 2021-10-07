@@ -1,4 +1,7 @@
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
 import org.sqlite.SQLiteConnection;
 import java.util.Scanner;
 import javax.swing.table.TableModel;
@@ -15,7 +18,7 @@ import net.proteanit.sql.DbUtils;
 public class Inventario 
 {   
     private ArrayList<Producto> productos = new ArrayList<Producto>();    
-    private int newID = 0;
+    private int newID;
     private Scanner sc;
     
 
@@ -37,54 +40,63 @@ public class Inventario
     {
        for(Producto prod : cprs)
        {
+    	   	Connection conne=sqliteconnection.dbconnector();
+	   		PreparedStatement pst;
+	   		int rs;
+	   		int id = prod.getID();
+	   		String name = prod.getNombre();
+	   		int pcom = prod.getPrecio_Compra();
+	   		int pven = prod.getPrecio_Venta();
+	   		int stk = prod.getStock();
+	   		
+	   		String comn1 = "Insert into Producto(ID,nombre,precio_compra,precio_venta,stock) values('"+id+"','"+name+"','"+pcom+"','"+pven+"','"+stk+"');";	
+	   		try {
+	   			pst = conne.prepareStatement(comn1);
+	   			rs = pst.executeUpdate();	
+	   			rs=0;
+	   			pst.close();
+	   		} catch (SQLException e) {
+	   			JOptionPane.showMessageDialog(null,"Error BuynewProduct(): "+e);
+	   		}	    	   
+    	   /*
            prod.setID(newID);
            productos.add(prod);     
            newID++;
+           */
        }
     }
     
     public int getNextID()
     {
-        return newID;
-    }
-    
-    public void addProduct(Producto prod) //Método temporal
-    {
-        prod.setID(newID);
-        productos.add(prod);
-        newID++;
+    	int id = -1;
+        ArrayList<Producto> products = mostrarProductos();
+        for(Producto prod : products)
+        {
+        	if(prod.getID()>id)
+        	{
+        		id = prod.getID();
+        	}
+        }
+        return id+1;
     }
     
     public void addOldProducts(ArrayList<Producto> cprs)
     {
         for(Producto prod : cprs)
         {
-            for(Producto producto : productos)
-            {
-                if(prod.getID() == producto.getID())
-                {
-                    producto.setStock(prod.getStock());
-                }
-            }
+            ModificarProducto(prod.getID(), prod.getNombre(), prod.getPrecio_Compra(), prod.getPrecio_Venta(), prod.getStock());
         }
     }   
     
-    public Producto ProductoNuevo()     
-    {       
-        System.out.println("Nombre: "); 
-        String nombre = sc.next();
-        System.out.println("Precio de compra: ");
-        int Pcom = sc.nextInt();
-        System.out.println("Precio de venta: ");
-        int Pvent = sc.nextInt();
-        System.out.println("Cantidad: ");
-        int stk = sc.nextInt();
+     
+    public Producto ProductoNuevo(String nombre,int Pcom,int Pvent,int stk)     
+    {   
         Producto prod = new Producto(nombre,Pcom,Pvent);
-        prod.setID(newID);
-        newID++;
+        prod.setID(getNextID());        
         prod.setStock(stk);
         return prod;
     }
+    
     
     public Producto productoAntiguo(int id,int stkps)
     {
@@ -102,6 +114,7 @@ public class Inventario
     //Comprueba si el ID existe en el inventario
     public boolean verificarID(int id)
     {
+    	ArrayList<Producto> productos = mostrarProductos();
         boolean fnd = false;
         if(!productos.isEmpty())
         {
@@ -147,7 +160,8 @@ public class Inventario
     
     public Producto buscarProducto(int id)
     {
-        Producto prod = null;
+    	Producto prod = null;
+    	ArrayList<Producto> productos = mostrarProductos();  
         for(Producto pr : productos)
         {
             if(pr.getID()==id)
@@ -187,41 +201,20 @@ public class Inventario
     
     public void ModificarProducto(int id,String nNmb,int nPcm, int nPvnt,int nStk )
     {
-        try
-        {
-            if(nNmb =="-"){}         
-            else    
-            {
-            buscarProducto(id).setNombre(nNmb);
-            }
-            if(nPcm == 999){}
-            else
-            {
-             buscarProducto(id).setPre_Compra(nPcm);
-            }
-            
-            if(nPvnt == 999){}
-            else
-            {
-             buscarProducto(id).setPre_Venta(nPvnt);
-            }   
-            
-            if(nStk == 999){}
-            else
-            {    
-             buscarProducto(id).setStock(nStk);
-            }
-            System.out.println("");
-            //System.out.print("Fecha de vencimiento: ");
-            //Date ndate= sc.next();
-            System.out.println("Edición terminada del producto: "+buscarProducto(id).getNombre());
-                
-        }catch(Exception e)
-        {
-            System.out.println("Formato Erroneo");
-        }
-        
-    
+    	Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst = null;			
+		int rsu=0;				
+		String comn1 = "update Producto set nombre='"+nNmb+"',precio_compra='"+nPcm+"',precio_venta='"+nPvnt+"',stock='"+nStk+"' where ID='"+id+"';";	
+		try {
+			
+			pst = conne.prepareStatement(comn1);
+			rsu = pst.executeUpdate();
+			//JOptionPane.showMessageDialog(null,"Guardado con éxito");
+			rsu = 0;
+			pst.close();
+		}catch (SQLException e1) {
+			JOptionPane.showMessageDialog(null,"Error al actualizar: "+e1+"--"+nNmb+"--"+nPcm+"--"+id);
+		}
     }
     
     public void EliminarProducto()

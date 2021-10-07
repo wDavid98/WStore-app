@@ -89,56 +89,46 @@ public class Inicio extends JFrame {
 	DefaultTableModel model = new DefaultTableModel(header, 0);
 	
 	//Método para actualizar tabla inventario
-		private void upDateTable() {
-		ArrayList<Producto> rs = null;
-		rs = inventerio.mostrarProductos();
-		for(Producto prod : rs)
+		private void upDateTable()
 		{
-			model.addRow(new Object[]{prod.getID(),prod.getNombre(),prod.getPrecio_Compra(),prod.getPrecio_Venta(),prod.getStock()});	
-			tableInventario.setModel(model);
+			model.setRowCount(0);
+			ArrayList<Producto> rs = null;
+			rs = inventerio.mostrarProductos();
+			for(Producto prod : rs)
+			{
+				model.addRow(new Object[]{prod.getID(),prod.getNombre(),prod.getPrecio_Compra(),prod.getPrecio_Venta(),prod.getStock()});	
+				tableInventario.setModel(model);
+			}
 		}
-	}
 	
 	//Método para actualizar tabla inventario segun un nombre
-		private void searchNameinTable(String name) {
-			Connection conne=sqliteconnection.dbconnector();
-			PreparedStatement pst = null;	
-			ResultSet rs = null;
-			String comn1 = "select ID, nombre, precio_compra, precio_venta, cantidad from Producto where nombre="+"'"+name+"';";		
-			try {		
-				pst = conne.prepareStatement(comn1);
-				rs = pst.executeQuery();			
-				//Llenado de tabla
-				tableInventario.setModel(DbUtils.resultSetToTableModel(rs));
-				rs.close();
-				pst.close();
-			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null,"Error al llenar la tabla -2: "+e);
-			}		
+		private void searchNameinTable(String name)
+		{
+			model.setRowCount(0);
+			ArrayList<Producto> rs = null;
+			rs = inventerio.mostrarProductos();
+			for(Producto prod : rs)
+			{
+				if(prod.getNombre().contentEquals(name))
+				{
+					model.addRow(new Object[]{prod.getID(),prod.getNombre(),prod.getPrecio_Compra(),prod.getPrecio_Venta(),prod.getStock()});	
+					tableInventario.setModel(model);
+				}
+			}
 		}
 	
 	
 	//Método para actualizar popUp menu
 	private void upDatePopMenu()
-	{		
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst = null;	
-		ResultSet rs = null;
-		String comn1 = "select nombre from Producto";	
-		comboBoxInventario.removeAllItems();		
-		try {					
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();
-			comboBoxInventario.addItem("");
-			while(rs.next())
-			{				
-				comboBoxInventario.addItem(rs.getString("nombre"));
-			}			
-			rs.close();
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"Error al llenar la tabla - 3: "+e);
-		}	
+	{
+		comboBoxInventario.removeAllItems();
+		comboBoxInventario.addItem("");
+		ArrayList<Producto> rs = null;
+		rs = inventerio.mostrarProductos();
+		for(Producto prod : rs)
+		{
+			comboBoxInventario.addItem(prod.getNombre());
+		}
 	}
 	 
 	
@@ -527,12 +517,10 @@ public class Inicio extends JFrame {
 		
 		contentPane.setLayout(gl_contentPane);		
 		//upDateTable();
-		comboBoxInventario.removeAllItems();		
-		upDatePopMenu();
+		//comboBoxInventario.removeAllItems();	
 		updateDatosNegocio();
-		
-		
-		
+		upDatePopMenu();
+				
 		
 			} // Fin del constructor
 	

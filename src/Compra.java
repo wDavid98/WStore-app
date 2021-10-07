@@ -44,6 +44,16 @@ public class Compra
         return ID;
     }
     
+    public Proveedor getProveedor()
+    {
+    	return proveedor;
+    }
+    
+    public HashMap<Producto,Integer> getProductos()
+    {
+    	return productos;
+    }
+    
     public Date getFecha()  
     {
         return fecha;
@@ -63,18 +73,9 @@ public class Compra
         return a;
     }   
     
-    public String getProveedorID()  
+    public int getProveedorID()  
     {
-        String a = "Null";
-        if(proveedor == null)
-        {
-            a = "Null";
-        }
-        else
-        {
-            a = ""+proveedor.getNID();
-        }
-        return a;
+        return proveedor.getNID();
     }   
     
     private void calcularTotal()    
