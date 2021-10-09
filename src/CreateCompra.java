@@ -286,8 +286,7 @@ public class CreateCompra extends JFrame {
 					cmboxInventario.removeAllItems();															
 					textNombre.setEditable(true);
 					textCmp.setEditable(true);
-					textPvent.setEditable(true);	
-					
+					textPvent.setEditable(true);						
 				}
 				
 			}
@@ -337,6 +336,9 @@ public class CreateCompra extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				Inventario inventario = new Inventario();
+				listproducts.clear();
+				newProducts.clear();
+				oldProducts.clear();
 				//Recorrer tabla y añadir productos nuevos y productos viejos al array correspondiente
 				int i = 0;
 				
@@ -381,8 +383,7 @@ public class CreateCompra extends JFrame {
 				else
 				{
 					prov = agenda.buscarProveedor(Integer.parseInt(textProvID.getText()));
-				}
-				
+				}				
 				//Para guardar la compra con proveedor se sigue:
                 //se crea la con el diccionario prod-cant
                 Compra compra = historial.crearCompra(listproducts);
@@ -391,9 +392,11 @@ public class CreateCompra extends JFrame {
                 // se agrega la compra al historial
                 historial.agregarCompra(compra); 
                 //se agregan al inventario los nuevos productos
-                inventario.addNewProducts(newProducts); //---> Guardar en la base de datos
+                inventario.addNewProducts(newProducts); 
                 //se modifican en el inventario los productos antiguos
-                inventario.addOldProducts(oldProducts); //---> Guardar en la base de datos
+                inventario.addOldProducts(oldProducts); 
+                
+                //Falta limpiar el JFrame
 								
 			}
 		});

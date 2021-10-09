@@ -20,6 +20,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputMethodListener;
 import java.awt.event.InputMethodEvent;
@@ -36,11 +38,11 @@ public class CreateVenta extends JFrame {
 	private JTextField tfPrvent;
 	private JTextField tfCantidad;
 	private JTextField tfRowSelected;
-	private JTextField textField_7;
-	private JTextField textField_8;
-	private JTextField textField_9;
+	private JTextField textClientName;
+	private JTextField textClienteCC;
 	
 	private JComboBox comboBoxItems;
+	private JComboBox comboBoxClients;
 	private JTextField tfStock;
 	
 	
@@ -68,20 +70,16 @@ public class CreateVenta extends JFrame {
 	
 	private int getIDbyName(String name)
 	{
-		int idr = 0;
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;	
-		ResultSet rs;
-		String comn1 = "select ID from Producto where nombre = '"+name+"';";	
-		try {					
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();				
-			idr = Integer.parseInt(rs.getString("ID"));			
-			rs.close();
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"No encontrado");
-		}	
+		Integer idr = null;
+		Inventario inventario = new Inventario();
+		ArrayList<Producto> prods = inventario.mostrarProductos();
+		for(Producto prd : prods)
+		{
+			if(prd.getNombre().equals(name))
+			{
+				idr = prd.getID();
+			}
+		}		
 		return idr;
 	}
 	
@@ -105,82 +103,57 @@ public class CreateVenta extends JFrame {
 	
 	private void fillDataWithCodeProduct(int code)
 	{
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;	
-		ResultSet rs;
-		String comn1 = "select * from Producto where ID = '"+code+"';";	
-		try {					
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();				
-			tfID.setText(""+rs.getString("ID"));
-			tfNombre.setText(""+rs.getString("nombre"));
-			tfPrvent.setText(""+rs.getString("precio_venta"));	
-			tfStock.setText(""+rs.getString("Cantidad"));
-			rs.close();
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"No encontrado");
-		}		
+		Inventario inventario = new Inventario();
+		ArrayList<Producto> prods = inventario.mostrarProductos();
+		for(Producto prd : prods)
+		{
+			if(prd.getID()==code)
+			{
+				tfID.setText(""+prd.getID());
+				tfNombre.setText(""+prd.getNombre());
+				tfPrvent.setText(""+prd.getPrecio_Venta());	
+				tfStock.setText(""+prd.getStock());
+			}
+		}
 	}
 	
 	private int getCurrentStock(int id)
 	{
 		int stk =0;
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;	
-		ResultSet rs;
-		String comn1 = "select Cantidad from Producto where ID = '"+id+"';";	
-		try {					
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();				
-			stk = Integer.parseInt(rs.getString("Cantidad"));			
-			rs.close();
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"No encontrado");
+		Inventario inventario = new Inventario();
+		ArrayList<Producto> prods = inventario.mostrarProductos();
+		for(Producto prd : prods)
+		{
+			if(prd.getID()==id)
+			{
+				stk = prd.getStock();
+			}
 		}		
 		return stk;
 	}
 	
-	private void upDateStock(int id, int act)
-	{
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;	
-		int rs;
-		String comn1 = "Update Producto set Cantidad ='"+act+"'where ID = '"+id+"';";	
-		try {					
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeUpdate();
-			rs = 0;
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"No encontrado");
-		}		
-	}
-	
-	
 	private void popUpUpdate2()
 	{
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;	
-		ResultSet rs;
-		String comn1 = "select nombre from Producto";	
-		comboBoxItems.removeAllItems();				
-		try {					
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();
-			comboBoxItems.addItem("");
-			
-			while(rs.next())
-			{				
-				comboBoxItems.addItem(rs.getString("nombre"));				
-			}			
-			
-			rs.close();
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"Error popUpUpdate(): "+e);
-		}		
+		comboBoxItems.removeAllItems();		
+		Inventario inventario = new Inventario();
+		ArrayList<Producto> prods = inventario.mostrarProductos();
+		comboBoxItems.addItem("");
+		for(Producto prod : prods)
+		{
+			comboBoxItems.addItem(prod.getNombre());		
+		}
+	}
+	
+	private void popCliente()
+	{
+		comboBoxClients.removeAllItems();		
+		Agenda agenda = new Agenda();
+		ArrayList<Cliente> clnts = agenda.showClientes();
+		comboBoxClients.addItem("");
+		for(Cliente cln : clnts)
+		{
+			comboBoxClients.addItem(cln.getCC());		
+		}
 	}
 
 	/**
@@ -221,8 +194,7 @@ public class CreateVenta extends JFrame {
 				if(comboBoxItems.getSelectedItem() != "")
 				{
 					int id = getIDbyName(comboBoxItems.getSelectedItem().toString());
-					fillDataWithCodeProduct(id);
-					//JOptionPane.showMessageDialog(null,itm+"--"+id);
+					fillDataWithCodeProduct(id);					
 				}		
 			}
 		});
@@ -253,30 +225,29 @@ public class CreateVenta extends JFrame {
 		JButton btnAgregar = new JButton("Agregar");
 		btnAgregar.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {				
+			public void mouseClicked(MouseEvent arg0) {									
 				try 
 					{
 						if( Integer.parseInt(tfCantidad.getText()) < Integer.parseInt(tfStock.getText()) && Integer.parseInt(tfCantidad.getText())!=0)
 						{
 							String nbr = tfNombre.getText();
+							Inventario inventario = new Inventario();						
 							int cStk;		
 							int nStk;
 							int idp = Integer.parseInt(tfID.getText());
 							int pvent = Integer.parseInt(tfPrvent.getText());					
 							int cnt1 = Integer.parseInt(tfCantidad.getText());						
 							int tot = pvent*cnt1;
-							model.addRow(new Object[]{idp,nbr,pvent,cnt1,tot});	
-							
-							cStk = getCurrentStock(idp);
-							nStk = cStk - cnt1;
-							upDateStock(idp,nStk);
-							fillDataWithCodeProduct(idp);	
-							sumaTotal();
-							
+							model.addRow(new Object[]{idp,nbr,pvent,cnt1,tot});								
+							cStk = inventario.buscarProducto(idp).getStock();
+							nStk = cStk - cnt1;				
+							tfStock.setText(""+nStk);
+							//fillDataWithCodeProduct(idp);	
+							sumaTotal();							
 						}
 						else {JOptionPane.showMessageDialog(null,"Cantidad nula o erronea");}
 						
-					}catch(Exception e){JOptionPane.showMessageDialog(null,"Error de formato");}							
+					}catch(Exception e){JOptionPane.showMessageDialog(null,"Error de formato");}					
 			}
 		});
 		
@@ -295,7 +266,7 @@ public class CreateVenta extends JFrame {
 					int idt = Integer.parseInt(""+model.getValueAt(Integer.parseInt(tfRowSelected.getText()), 0));
 					int cStk = getCurrentStock(idt);
 					int nStk = cStk + cnt;
-					upDateStock(idt, nStk);
+					/*upDateStock(idt, nStk);*/
 					fillDataWithCodeProduct(idt);	
 					model.removeRow(Integer.parseInt(tfRowSelected.getText()));		
 					table.setModel(model);
@@ -308,30 +279,68 @@ public class CreateVenta extends JFrame {
 		btnVender.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				cerrarVentana();
+				Inventario inventario = new Inventario();
+				//Recorrer tabla y añadir productos nuevos y productos viejos al array correspondiente
+				HashMap<Producto,Integer> listprods = new HashMap<Producto,Integer>();
+				ArrayList<Producto> oldProducts = new ArrayList<Producto>();
+				int i = 0;
+				
+				while(i<model.getRowCount())
+				{
+					//Primero agregar los productos
+					int idpr = Integer.parseInt(model.getValueAt(i, 0).toString());
+					int cnt = Integer.parseInt(model.getValueAt(i, 3).toString());
+					boolean ext = inventario.verificarExistencia(idpr,cnt);
+                    if(ext) // Si hay suficiente para vender
+                    {
+                        Producto prod = inventario.productoAVender(idpr,cnt);
+                        listprods.put(prod,cnt);
+                        inventario.ModificarProducto(prod.getID(), prod.getNombre(), prod.getPrecio_Compra(), prod.getPrecio_Venta(), prod.getStock());
+                        System.out.println("Producto añadido");
+                    }
+                    else //Si no hay suficiente para vender
+                    {
+                        JOptionPane.showMessageDialog(null,"No hay suficiente Stock disponible para el producto: "+model.getValueAt(i, 1).toString());
+                    }                    
+                    i++;	
+                                      
+				}
+				
+				Historial historial = new Historial();			
+				Agenda agenda = new Agenda();
+				Cliente cln = null;
+                //Crear la venta a partir del diccionario producto-cantidad
+                Venta venta = historial.crearVenta(listprods); 
+                //En este caso, asignar un cliente a la venta
+                venta.setCliente(cln);
+                if(textClienteCC.getText().equals(""))
+				{
+					
+				}
+				else
+				{
+					cln = agenda.buscarCliente(Integer.parseInt(textClienteCC.getText()));
+				}		
+                venta.setCliente(cln);
+                //Guardar Venta en el historial.
+                historial.agregarVenta(venta); // --> Guardar en la BD
+                System.out.println("Se registro la venta");
+				
+				
 			}
 		});
 		
-		textField_7 = new JTextField();
-		textField_7.setEnabled(false);
-		textField_7.setColumns(10);
+		textClientName = new JTextField();
+		textClientName.setEditable(false);
+		textClientName.setColumns(10);
 		
-		textField_8 = new JTextField();
-		textField_8.setEnabled(false);
-		textField_8.setColumns(10);
-		
-		textField_9 = new JTextField();
-		textField_9.setEnabled(false);
-		textField_9.setColumns(10);
+		textClienteCC = new JTextField();
+		textClienteCC.setEditable(false);
+		textClienteCC.setColumns(10);
 		
 		JLabel lblCliente = new JLabel("Cliente");
-		lblCliente.setEnabled(false);
 		
 		JLabel lblCc = new JLabel("C.C ");
-		lblCc.setEnabled(false);
-		
-		JLabel lblTelfono = new JLabel("Tel\u00E9fono");
-		lblTelfono.setEnabled(false);
 		
 		JButton btnBuscar = new JButton("Buscar");
 		btnBuscar.addMouseListener(new MouseAdapter() {
@@ -352,6 +361,34 @@ public class CreateVenta extends JFrame {
 		tfTotalVenta = new JTextField();
 		tfTotalVenta.setEditable(false);
 		tfTotalVenta.setColumns(10);
+		
+		comboBoxClients = new JComboBox();
+		comboBoxClients.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(comboBoxClients.getSelectedItem() != "")
+				{
+					Agenda agenda = new Agenda();
+					Cliente client = null;
+					ArrayList<Cliente> clns = agenda.showClientes();
+					int id= Integer.parseInt(comboBoxClients.getSelectedItem().toString());
+					for(Cliente cln : clns)
+					{
+						if(cln.getCC()==id)
+						{
+							client = cln;
+						}
+					}
+					textClientName.setText(client.getNombre());
+					textClienteCC.setText(""+client.getCC());
+				}
+				else
+				{
+					textClientName.setText("");
+					textClienteCC.setText("");
+				}
+				
+			}
+		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.TRAILING)
@@ -405,109 +442,119 @@ public class CreateVenta extends JFrame {
 							.addContainerGap()
 							.addComponent(comboBoxItems, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
 							.addGap(34)))
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+							.addGap(18)
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addGap(18)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+										.addComponent(lblLista, GroupLayout.PREFERRED_SIZE, 88, GroupLayout.PREFERRED_SIZE)
+										.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
+											.addGroup(gl_contentPane.createSequentialGroup()
+												.addGap(10)
+												.addComponent(tfRowSelected, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.UNRELATED)
+												.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+												.addComponent(lbl_random, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
+												.addGap(18)
+												.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, 110, GroupLayout.PREFERRED_SIZE))
+											.addComponent(scrollPane, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 499, GroupLayout.PREFERRED_SIZE))))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addGap(36)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+										.addComponent(lblCc, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblCliente, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE))
+									.addGap(18)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+										.addComponent(textClientName, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
+										.addComponent(textClienteCC, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))))
+							.addGap(17))
 						.addGroup(gl_contentPane.createSequentialGroup()
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnVender, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-							.addGroup(gl_contentPane.createSequentialGroup()
-								.addGap(18)
-								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-									.addComponent(lblLista, GroupLayout.PREFERRED_SIZE, 88, GroupLayout.PREFERRED_SIZE)
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
-										.addGroup(gl_contentPane.createSequentialGroup()
-											.addGap(10)
-											.addComponent(tfRowSelected, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-											.addPreferredGap(ComponentPlacement.UNRELATED)
-											.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
-											.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-											.addComponent(lbl_random, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
-											.addGap(18)
-											.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, 110, GroupLayout.PREFERRED_SIZE))
-										.addComponent(scrollPane, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 499, GroupLayout.PREFERRED_SIZE))))
-							.addGroup(gl_contentPane.createSequentialGroup()
-								.addGap(44)
-								.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-									.addComponent(lblTelfono, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)
-									.addComponent(lblCc, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)
-									.addComponent(lblCliente, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE))
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-									.addComponent(textField_7, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
-									.addComponent(textField_9, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
-									.addComponent(textField_8, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))
-								.addGap(40))))
-					.addGap(170))
+							.addGap(68)
+							.addComponent(comboBoxClients, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED, 112, Short.MAX_VALUE)
+							.addComponent(btnVender, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
+							.addGap(55))))
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_contentPane.createSequentialGroup()
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
-							.addContainerGap(27, Short.MAX_VALUE)
-							.addComponent(lblInserteProducto)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblPorCdigo)
-								.addComponent(tfCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
 								.addGroup(gl_contentPane.createSequentialGroup()
-									.addGap(28)
-									.addComponent(lblNombre))
-								.addGroup(gl_contentPane.createSequentialGroup()
+									.addComponent(lblInserteProducto)
 									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(btnBuscar)))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(comboBoxItems, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblId)
-								.addComponent(tfID, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblNombre_1)
-								.addComponent(tfNombre, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblPrecioVenta)
-								.addComponent(tfPrvent, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblStockDisponible)
-								.addComponent(tfStock, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(lblPorCdigo)
+										.addComponent(tfCode, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+										.addGroup(gl_contentPane.createSequentialGroup()
+											.addGap(28)
+											.addComponent(lblNombre))
+										.addGroup(gl_contentPane.createSequentialGroup()
+											.addPreferredGap(ComponentPlacement.RELATED)
+											.addComponent(btnBuscar)))
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(comboBoxItems, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(lblId)
+										.addComponent(tfID, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(lblNombre_1)
+										.addComponent(tfNombre, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(lblPrecioVenta)
+										.addComponent(tfPrvent, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(lblStockDisponible)
+										.addComponent(tfStock, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+										.addComponent(lblCantidad)
+										.addComponent(tfCantidad, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addGap(18))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addComponent(lblLista)
+									.addGap(7)
+									.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(tfRowSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
+										.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(lbl_random))
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+										.addGroup(gl_contentPane.createSequentialGroup()
+											.addGap(26)
+											.addComponent(comboBoxClients, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
+											.addGap(23))
+										.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+											.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+											.addComponent(btnVender)
+											.addGap(9)))))
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblCantidad)
-								.addComponent(tfCantidad, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addGap(18)
-							.addComponent(btnAgregar)
-							.addGap(20))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(lblLista)
-							.addGap(7)
-							.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+									.addComponent(btnAgregar)
+									.addGap(20))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addGap(26)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(textClienteCC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(lblCc))))
+							.addGap(41))
+						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(tfRowSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
-								.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lbl_random))
-							.addGap(18)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblCliente)
-								.addComponent(textField_7, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblCc)
-								.addComponent(textField_8, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblTelfono)
-								.addComponent(textField_9, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(btnVender)))
-					.addGap(25))
+								.addComponent(textClientName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblCliente))
+							.addGap(75))))
 		);
 		
 		table = new JTable();
@@ -524,6 +571,7 @@ public class CreateVenta extends JFrame {
 		contentPane.setLayout(gl_contentPane);
 		
 		popUpUpdate2();
+		popCliente();
 		
 		
 		

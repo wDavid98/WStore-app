@@ -41,8 +41,31 @@ public class Historial
     
     public void agregarVenta(Venta venta) //temporal
     {
-        ventas.add(venta);
-        idVenta++;
+    	Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst;
+		int rs;
+		Date date = venta.getFecha();
+		HashMap<Producto,Integer> prods = venta.getProductos();
+		Integer idcln;
+		if(venta.getCliente()== null)
+		{
+			idcln = null;
+		}
+		else
+		{
+			idcln = venta.getCliente().getCC();
+		}		 
+		int tot = venta.getTotal();
+		
+		String comn1 = "Insert into Venta(fecha,productos,id_cliente,total) values('"+date+"','"+prods+"','"+idcln+"','"+tot+"');";	
+		try {
+			pst = conne.prepareStatement(comn1);
+			rs = pst.executeUpdate();	
+			rs=0;
+			pst.close();
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,"Error al guardar venta(): "+e);
+		}	
     }
     
     public Compra crearCompra(HashMap<Producto,Integer> cprs)

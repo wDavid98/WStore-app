@@ -56,13 +56,9 @@ public class Inventario
 	   			rs=0;
 	   			pst.close();
 	   		} catch (SQLException e) {
-	   			JOptionPane.showMessageDialog(null,"Error BuynewProduct(): "+e);
+	   			JOptionPane.showMessageDialog(null,"No se puedo crear registro: "+name);
 	   		}	    	   
-    	   /*
-           prod.setID(newID);
-           productos.add(prod);     
-           newID++;
-           */
+    	   
        }
     }
     
@@ -213,7 +209,7 @@ public class Inventario
 			rsu = 0;
 			pst.close();
 		}catch (SQLException e1) {
-			JOptionPane.showMessageDialog(null,"Error al actualizar: "+e1+"--"+nNmb+"--"+nPcm+"--"+id);
+			JOptionPane.showMessageDialog(null,"Error al actualizar: "+nNmb+"--"+nPcm+"--"+id);
 		}
     }
     

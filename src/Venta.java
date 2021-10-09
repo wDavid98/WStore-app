@@ -37,6 +37,15 @@ public class Venta
     
     public int getTotal(){ return total;}
     
+    public HashMap<Producto,Integer> getProductos()
+    {
+    	return productos;
+    }
+    public Cliente getCliente()
+    {
+    	return cliente;
+    }
+    
     public void añadirProducto(Producto prod,int cnt)
     {
         productos.put(prod,cnt);
