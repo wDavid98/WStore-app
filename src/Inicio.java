@@ -166,28 +166,19 @@ public class Inicio extends JFrame {
 		return oldNid;
 	}
 	
-	public String getNbr_byclick()
-	{
-		return nbr_cl_ti;
-	}
+	
 	public void setNbr_byclick(String nn)
 	{
 		nbr_cl_ti = nn;	
 	}
 	
-	public int getPcom_byclick()
-	{
-		return pcom_cl_ti;
-	}
+	
 	public void setPcom_byclick(int nn)
 	{
 		pcom_cl_ti = nn;	
 	}
 	
-	public int getPvent_byclick()
-	{
-		return pvnt_cl_ti;
-	}
+	
 	public void setPvent_byclick(int nn)
 	{
 		pvnt_cl_ti = nn;	
@@ -201,7 +192,6 @@ public class Inicio extends JFrame {
 	{
 		cnt_cl_ti = nn;	
 	}
-	
 	
 	
 	
@@ -320,10 +310,15 @@ public class Inicio extends JFrame {
 		btnContabilidad.setEnabled(false);
 		
 		JButton btnModificar_6 = new JButton("Clientes");
-		btnModificar_6.setEnabled(false);
+		btnModificar_6.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				Terceros terceros = new Terceros();
+				terceros.setVisible(true);
+			}
+		});
 		
 		JButton btnModificar_6_1 = new JButton("Proveedores");
-		btnModificar_6_1.setEnabled(false);
 		
 		JScrollPane scrollPaneCombo = new JScrollPane();
 		
