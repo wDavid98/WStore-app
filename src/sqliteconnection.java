@@ -6,9 +6,8 @@ public class sqliteconnection {
 	public static Connection dbconnector() 
 	{
 		try {			
-			Class.forName("org.sqlite.JDBC");			
-			Connection conn = DriverManager.getConnection("jdbc:sqlite:D:\\Mis Documentos\\Documentos\\GitHub\\WStore-app\\wstoreDB.db");			
-			//JOptionPane.showMessageDialog(null, "Connection Succesfull");
+			Class.forName("org.sqlite.JDBC");				
+			Connection conn = DriverManager.getConnection("jdbc:sqlite:wstoreDB.db");
 			return conn;
 		}catch(Exception e) 
 		{

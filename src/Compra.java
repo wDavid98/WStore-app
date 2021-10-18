@@ -73,7 +73,7 @@ public class Compra
         return a;
     }   
     
-    public int getProveedorID()  
+    public Integer getProveedorID()  
     {
         return proveedor.getNID();
     }   
@@ -90,6 +90,7 @@ public class Compra
     {
         return total;
     }
+    
     
     public void imprimir()  
     {   

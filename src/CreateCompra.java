@@ -18,7 +18,10 @@ import java.awt.event.ActionEvent;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;  
+import java.util.Map;
+import java.awt.Color;
+import javax.swing.border.CompoundBorder;
+import java.awt.Toolkit;  
 
 public class CreateCompra extends JFrame {
 
@@ -76,6 +79,8 @@ public class CreateCompra extends JFrame {
 		}
 	}
 	
+	
+	
 	private void popUpProveUpdate()
 	{
 		cmboxProveedor.removeAllItems();
@@ -109,7 +114,7 @@ public class CreateCompra extends JFrame {
 			textNombre.setText("");
 			textCmp.setText("");
 			textPvent.setText("");
-			textCnt.setText("");	
+			textCnt.setText("");
 			
 		}
 	}
@@ -119,12 +124,10 @@ public class CreateCompra extends JFrame {
 		if(prv!=null)
 		{
 			textProvID.setText(""+prv.getNID());
-			textProvName.setText(""+prv.getNombre());
-			
+			textProvName.setText(""+prv.getNombre());			
 		}
 		else
-		{
-				
+		{				
 			textProvID.setText("");
 			textProvName.setText("");
 		}
@@ -170,92 +173,19 @@ public class CreateCompra extends JFrame {
 	}
 	
 	
-	/*
-	private void BuynewProduct(String name, int pcom, int pvent, int cant)
-	{
-		//Añade un producto nuevo a la base de datos, tabla Producto
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;
-		int rs;
-		String comn1 = "Insert into Producto(nombre,precio_compra,precio_venta,cantidad) values('"+name+"','"+pcom+"','"+pvent+"','"+cant+"');";	
-		try {
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeUpdate();	
-			rs=0;
-			pst.close();
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(null,"Error BuynewProduct(): "+e);
-		}		
-	}
-	private void BuyoldProduct(String name, int cant)
-	{
-		//Si el nombre ya existe en la base de datos, actualiza su cantidad añadienola a la que ya había
-		No permite modificaciones de otros atributos, por lo que o se agrega el mismo producto con otro nombre, o se modifica directamente
-		desde la pastalla principal
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;
-		int rs;
-		String comn1 = "update Producto set cantidad='"+cant+"' where nombre='"+name+"';";
-		try {
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeUpdate();					
-			rs=0;
-			pst.close();
-		} catch (SQLException e) {JOptionPane.showMessageDialog(null,"Error BuyoldProduct(): "+e);}
-		
-	}
-	*/
-
-	
-	/*private int getCurrentCuantity(String name)
-	{
-		int cnt = 0;
-		String comn1 = "select cantidad from Producto where nombre='"+name+"';";			
-		try {	
-			Connection conne=sqliteconnection.dbconnector();
-			PreparedStatement pst;
-			ResultSet rs;
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();			
-			//-----			
-			cnt = Integer.parseInt(rs.getString("cantidad").toString());
-			//-----			
-			rs.close();
-			pst.close();			
-		}catch(Exception e) {}
-		return cnt;
-	}
-	
-	private boolean searchProduct(String name)
-	{
-		//Revisa si el producto existe en la tabla Producto, retornando true si lo encuentra, false si no.
-		boolean fnd = false;
-		Connection conne=sqliteconnection.dbconnector();
-		PreparedStatement pst;
-		ResultSet rs;
-		String comn1 = "select * from Producto where nombre='"+name+"';";	
-		try {
-			pst = conne.prepareStatement(comn1);
-			rs = pst.executeQuery();				
-			if(rs.next())
-			{
-				fnd=true;
-			}			
-			rs.close();
-			pst.close();
-		} catch (SQLException e) {}
-		
-		return fnd;
-	}*/
 
 	/**
 	 * Create the frame.
 	 */
 	public CreateCompra() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage("D:\\Mis Documentos\\Documentos\\GitHub\\WStore-app\\templates\\pngwing.com.png"));
+		setTitle("Crear Compra");
+		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 778, 435);
+		setBounds(100, 100, 778, 414);
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBackground(Color.WHITE);
+		contentPane.setBorder(new CompoundBorder());
 		setContentPane(contentPane);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -263,6 +193,7 @@ public class CreateCompra extends JFrame {
 		JScrollPane scrollPane_1 = new JScrollPane();
 		
 		JCheckBox ckboxNewProduct = new JCheckBox("Producto Nuevo");
+		ckboxNewProduct.setBackground(Color.WHITE);
 		ckboxNewProduct.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -354,7 +285,7 @@ public class CreateCompra extends JFrame {
 						//String Date= model.getValueAt(i, 5).toString()					
 		                Producto prod = inventario.ProductoNuevo(nmbre,Pcom,Pvent,stk); 
 		                listproducts.put(prod, prod.getStock());		                                
-						newProducts.add(prod);				
+						newProducts.add(prod);		
 						
 						i++;														
 					}
@@ -368,12 +299,13 @@ public class CreateCompra extends JFrame {
                         //Se guarda producto en el diccionario prod-cantidad
                         listproducts.put(prod,cnt);    
                         //se guarda en la lista de antiguos para modificación de inventario
-                        oldProducts.add(prod);                        
+                        oldProducts.add(prod);                          
+                        
                         i++;
 					}
 				}
 			
-				Historial historial = new Historial();			
+				Balance historial = new Balance();			
 				Agenda agenda = new Agenda();
 				Proveedor prov = null;
 				if(textProvID.getText().equals(""))
@@ -396,7 +328,22 @@ public class CreateCompra extends JFrame {
                 //se modifican en el inventario los productos antiguos
                 inventario.addOldProducts(oldProducts); 
                 
-                //Falta limpiar el JFrame
+                model.setRowCount(0);
+				tableCompra.setModel(model);
+				textCmp.setText("");
+				textCnt.setText("");
+				textID.setText("");
+				textNombre.setText("");
+				textProvID.setText("");
+				textProvName.setText("");
+				textPvent.setText("");
+				lblTotal.setText("");
+				cmboxInventario.setSelectedIndex(0);
+				cmboxProveedor.setSelectedIndex(0);
+                
+                model.setRowCount(0);
+				tableCompra.setModel(model);
+				JOptionPane.showMessageDialog(null, "Compra Guardada");
 								
 			}
 		});
@@ -464,36 +411,36 @@ public class CreateCompra extends JFrame {
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addGap(85)
-									.addComponent(ckboxNewProduct))
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addContainerGap(35, Short.MAX_VALUE)
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_contentPane.createSequentialGroup()
-											.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-												.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-													.addComponent(lblPrecioVenta, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)
-													.addComponent(lblId, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)
-													.addComponent(lblTipo, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))
-												.addComponent(lblPrecioCompra, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
-												.addComponent(lblCantidad, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE))
-											.addPreferredGap(ComponentPlacement.RELATED)
-											.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-												.addComponent(textCnt, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-												.addComponent(textNombre, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-												.addComponent(textPvent, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-												.addComponent(textID, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
-												.addComponent(textCmp, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)))
-										.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)
-										.addComponent(cmboxProveedor, GroupLayout.PREFERRED_SIZE, 226, GroupLayout.PREFERRED_SIZE))))
-							.addPreferredGap(ComponentPlacement.RELATED, 27, Short.MAX_VALUE))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(86)
-							.addComponent(btnAgregar, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)))
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+							.addGroup(gl_contentPane.createSequentialGroup()
+								.addContainerGap(35, Short.MAX_VALUE)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+									.addGroup(gl_contentPane.createSequentialGroup()
+										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+											.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+												.addComponent(lblPrecioVenta, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)
+												.addComponent(lblId, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)
+												.addComponent(lblTipo, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))
+											.addComponent(lblPrecioCompra, GroupLayout.PREFERRED_SIZE, 83, GroupLayout.PREFERRED_SIZE)
+											.addComponent(lblCantidad, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+											.addComponent(textCnt, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
+											.addComponent(textNombre, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
+											.addComponent(textPvent, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
+											.addComponent(textID, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)
+											.addComponent(textCmp, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE)))
+									.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)
+									.addComponent(cmboxProveedor, GroupLayout.PREFERRED_SIZE, 226, GroupLayout.PREFERRED_SIZE))
+								.addPreferredGap(ComponentPlacement.RELATED, 27, Short.MAX_VALUE))
+							.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+								.addContainerGap()
+								.addComponent(ckboxNewProduct)
+								.addGap(101)))
+						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+							.addContainerGap()
+							.addComponent(btnAgregar, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+							.addGap(99)))
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addGroup(gl_contentPane.createSequentialGroup()
@@ -509,11 +456,11 @@ public class CreateCompra extends JFrame {
 								.addComponent(textProvName, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE))
 							.addGap(55)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(btnGuardar, GroupLayout.PREFERRED_SIZE, 176, GroupLayout.PREFERRED_SIZE)
 								.addGroup(gl_contentPane.createSequentialGroup()
 									.addComponent(lblCantidad_1, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)
 									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)))))
+									.addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE))
+								.addComponent(btnGuardar, GroupLayout.PREFERRED_SIZE, 176, GroupLayout.PREFERRED_SIZE))))
 					.addContainerGap())
 		);
 		gl_contentPane.setVerticalGroup(
@@ -544,9 +491,7 @@ public class CreateCompra extends JFrame {
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 								.addComponent(textCnt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblCantidad))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(btnAgregar))
+								.addComponent(lblCantidad)))
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 206, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
@@ -555,18 +500,23 @@ public class CreateCompra extends JFrame {
 								.addComponent(btnEliminar)
 								.addComponent(lblTotal)
 								.addComponent(lblCantidad_1))))
-					.addGap(18)
+					.addGap(20)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-							.addComponent(cmboxProveedor, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE)
-							.addComponent(textProvID, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-							.addComponent(lblId_1))
-						.addComponent(btnGuardar))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(textProvName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblTipo_1))
-					.addContainerGap(47, Short.MAX_VALUE))
+						.addGroup(gl_contentPane.createSequentialGroup()
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+								.addComponent(cmboxProveedor, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE)
+								.addComponent(textProvID, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblId_1))
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+								.addComponent(textProvName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblTipo_1)))
+						.addComponent(btnGuardar, GroupLayout.PREFERRED_SIZE, 34, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap(36, Short.MAX_VALUE))
+				.addGroup(gl_contentPane.createSequentialGroup()
+					.addContainerGap(258, Short.MAX_VALUE)
+					.addComponent(btnAgregar)
+					.addGap(104))
 		);
 		
 		cmboxInventario = new JComboBox();
@@ -587,6 +537,8 @@ public class CreateCompra extends JFrame {
 		popUpProveUpdate();
 		
 		tableCompra = new JTable();
+		tableCompra.setBackground(Color.WHITE);
+		tableCompra.setForeground(Color.DARK_GRAY);
 		tableCompra.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent evt) {

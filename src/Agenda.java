@@ -17,14 +17,14 @@ public class Agenda
     // instance variables - replace the example below with your own
     private ArrayList<Proveedor> proveedores = new ArrayList<Proveedor>();
     private ArrayList<Cliente> clientes = new ArrayList<Cliente>();
-    private Scanner sc; 
+    
     /**
      * Constructor for objects of class Agenda
      */
     public Agenda()
     {
         // initialize instance variables
-        sc = new Scanner(System.in);
+        
     }
     
     public ArrayList<Proveedor> getAgendaProveedores()
@@ -112,14 +112,47 @@ public class Agenda
 		return clientes;
     }
     
-    public void addProveedor(Proveedor prov) //Método temporar
+    public void addProveedor(Proveedor prov) 
     {
-        proveedores.add(prov);
+    	Connection conne=sqliteconnection.dbconnector();
+   		PreparedStatement pst;
+   		int rs;
+   		int id = prov.getNID();
+   		String name = prov.getNombre();
+   		int telph = prov.getTelefono();
+   		String dir = prov.getDireccion();   	
+   		
+   		String comn1 = "Insert into Proveedor(NID,nombre,telefono,direccion) values('"+id+"','"+name+"','"+telph+"','"+dir+"');";	
+   		try {
+   			pst = conne.prepareStatement(comn1);
+   			rs = pst.executeUpdate();	
+   			rs=0;
+   			pst.close();
+   		} catch (SQLException e) {
+   			JOptionPane.showMessageDialog(null,"No se puedo crear registro: "+name);
+   		}	  
     }
     
     public void addCliente(Cliente client) //método temporar
     {
-        clientes.add(client);
+    	System.out.println("Entra a la función");
+    	Connection conne=sqliteconnection.dbconnector();
+   		PreparedStatement pst;
+   		int rs;
+   		int id = client.getCC();
+   		String name = client.getNombre();
+   		int telph = client.getTelefono();
+   		String dir = client.getDireccion();   		
+   		
+   		String comn1 = "Insert into Cliente(cc,nombre,telefono,direccion) values('"+id+"','"+name+"','"+telph+"','"+dir+"');";	
+   		try {
+   			pst = conne.prepareStatement(comn1);
+   			rs = pst.executeUpdate();	
+   			rs=0;
+   			pst.close();
+   		} catch (SQLException e) {
+   			JOptionPane.showMessageDialog(null,"No se puedo crear registro: "+name);
+   		}	  
     }
     
     public Proveedor provNuevo(int nid,String prnom,int ptel,String dir)
@@ -204,76 +237,72 @@ public class Agenda
     
     public void modificarCliente(int cc, String nNmb,int telf,String dir)
     {
-       if(nNmb =="+"){}
-       else 
-       {
-           buscarCliente(cc).setNombre(nNmb);
-       }
-       if(telf == 0){}
-       else
-       {
-           buscarCliente(cc).setTelefono(telf);
-       }
-       if(dir == "+"){}
-       else
-       {
-           buscarCliente(cc).setDireccion(dir);
-       }
+    	Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst = null;			
+		int rsu=0;				
+		String comn1 = "update Cliente set nombre='"+nNmb+"',telefono='"+telf+"',direccion='"+dir+"' where CC='"+cc+"';";	
+		try {
+			
+			pst = conne.prepareStatement(comn1);
+			rsu = pst.executeUpdate();		
+			rsu = 0;
+			pst.close();
+		}catch (SQLException e1) {
+			JOptionPane.showMessageDialog(null,"Error al actualizar:");
+		}
     }
     
     public void modificarProveedor(int nit, String nNmb,int telf,String dir)
     {
-       if(nNmb =="+"){}
-       else 
-       {
-           buscarProveedor(nit).setNombre(nNmb);
-       }
-       if(telf == 0){}
-       else
-       {
-           buscarProveedor(nit).setTelefono(telf);
-       }
-       if(dir == "+"){}
-       else
-       {
-           buscarProveedor(nit).setDireccion(dir);
-       }
-           
+    	Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst = null;			
+		int rsu=0;				
+		String comn1 = "update Proveedor set nombre='"+nNmb+"',telefono='"+telf+"',direccion='"+dir+"' where NID='"+nit+"';";	
+		try {
+			
+			pst = conne.prepareStatement(comn1);
+			rsu = pst.executeUpdate();		
+			rsu = 0;
+			pst.close();
+		}catch (SQLException e1) {
+			JOptionPane.showMessageDialog(null,"Error al actualizar:");
+		}           
     }
     
     public void eliminarCliente(int id)
     {   
-        //verificar si el id está 
-        boolean fnd = existeCliente(id);
-        //Si el id está,pedir que ingrese los datos
-        if(!fnd)    
-        {
-            System.out.println("Cliente no encontrado");
-        }
-        else    
-        {
-            clientes.remove(buscarCliente(id));
-            showClientes();
-            System.out.println("------ Cliente eliminado");         
-        }
+    	Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst = null;			
+		int rsu=0;				
+		String comn1 = "delete from Cliente where cc='"+id+"';";	
+		try {
+			
+			pst = conne.prepareStatement(comn1);
+			rsu = pst.executeUpdate();		
+			JOptionPane.showMessageDialog(null,"Eliminado") ; 	
+			rsu = 0;
+			pst.close();
+		}catch (SQLException e1) {
+			JOptionPane.showMessageDialog(null,"Error al eliminar: "+e1);
+		}
     }
     
     public void eliminarProveedor(int id)
     {
-        //verificar si el id está       
-        boolean fnd = existeProveedor(id);
-        //Si el id está,pedir que ingrese los datos
-        if(!fnd)
-        {
-            System.out.println("Proveedor no encontrado**");
-        }
-        else    
-        {
-            proveedores.remove(buscarProveedor(id));
-            showProveedores();
-            System.out.println("------ Proveedor eliminado");
-           
-        }
+    	Connection conne=sqliteconnection.dbconnector();
+		PreparedStatement pst = null;			
+		int rsu=0;				
+		String comn1 = "delete from Proveedor where NID='"+id+"';";	
+		try {
+			
+			pst = conne.prepareStatement(comn1);
+			rsu = pst.executeUpdate();		
+			JOptionPane.showMessageDialog(null,"Eliminado") ; 	
+			rsu = 0;
+			pst.close();
+		}catch (SQLException e1) {
+			JOptionPane.showMessageDialog(null,"Error al eliminar: "+e1);
+		}
     }
     
     public void agregarCliente(int cc,String prnom,int ptel,String dir)
@@ -287,6 +316,5 @@ public class Agenda
     }
     
     
-    
-    
+       
 }

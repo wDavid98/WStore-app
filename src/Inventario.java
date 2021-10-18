@@ -204,8 +204,7 @@ public class Inventario
 		try {
 			
 			pst = conne.prepareStatement(comn1);
-			rsu = pst.executeUpdate();
-			//JOptionPane.showMessageDialog(null,"Guardado con éxito");
+			rsu = pst.executeUpdate();			
 			rsu = 0;
 			pst.close();
 		}catch (SQLException e1) {

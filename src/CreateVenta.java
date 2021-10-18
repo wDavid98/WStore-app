@@ -27,6 +27,9 @@ import java.awt.event.InputMethodListener;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.SwingConstants;
 
 public class CreateVenta extends JFrame {
 
@@ -160,20 +163,28 @@ public class CreateVenta extends JFrame {
 	 * Create the frame.
 	 */
 	public CreateVenta() {
+		setForeground(Color.WHITE);
+		setTitle("Crear Venta");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 823, 417);
 		contentPane = new JPanel();
+		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		
 		JLabel lblLista = new JLabel("Lista");
+		lblLista.setHorizontalAlignment(SwingConstants.CENTER);
+		lblLista.setFont(new Font("Sylfaen", Font.BOLD, 14));
 		
 		JLabel lblInserteProducto = new JLabel("Inserte Producto");
+		lblInserteProducto.setHorizontalAlignment(SwingConstants.CENTER);
+		lblInserteProducto.setFont(new Font("Sitka Subheading", Font.BOLD, 14));
 		
 		JLabel lblPorCdigo = new JLabel("Por C\u00F3digo:");
+		lblPorCdigo.setFont(new Font("Yu Gothic UI", Font.BOLD, 12));
 		
 		tfCode = new JTextField();
 		tfCode.addInputMethodListener(new InputMethodListener() {
@@ -187,6 +198,7 @@ public class CreateVenta extends JFrame {
 		tfCode.setColumns(10);
 		
 		JLabel lblNombre = new JLabel("Nombre:");
+		lblNombre.setFont(new Font("Yu Gothic UI", Font.BOLD, 12));
 		
 		comboBoxItems = new JComboBox();
 		comboBoxItems.addActionListener(new ActionListener() {
@@ -200,10 +212,13 @@ public class CreateVenta extends JFrame {
 		});
 		
 		JLabel lblId = new JLabel("ID");
+		lblId.setFont(new Font("Yu Gothic UI", Font.BOLD, 12));
 		
 		JLabel lblNombre_1 = new JLabel("Nombre");
+		lblNombre_1.setFont(new Font("Yu Gothic UI", Font.BOLD, 12));
 		
 		JLabel lblPrecioVenta = new JLabel("Precio Venta Unidad");
+		lblPrecioVenta.setFont(new Font("Yu Gothic UI", Font.BOLD, 12));
 		
 		tfID = new JTextField();
 		tfID.setEditable(false);
@@ -221,6 +236,7 @@ public class CreateVenta extends JFrame {
 		tfCantidad.setColumns(10);
 		
 		JLabel lblCantidad = new JLabel("Cantidad");
+		lblCantidad.setFont(new Font("Yu Gothic UI", Font.BOLD, 12));
 		
 		JButton btnAgregar = new JButton("Agregar");
 		btnAgregar.addMouseListener(new MouseAdapter() {
@@ -252,6 +268,7 @@ public class CreateVenta extends JFrame {
 		});
 		
 		tfRowSelected = new JTextField();
+		tfRowSelected.setBackground(Color.WHITE);
 		tfRowSelected.setEnabled(false);
 		tfRowSelected.setEditable(false);
 		tfRowSelected.setColumns(10);
@@ -306,7 +323,7 @@ public class CreateVenta extends JFrame {
                                       
 				}
 				
-				Historial historial = new Historial();			
+				Balance historial = new Balance();		
 				Agenda agenda = new Agenda();
 				Cliente cln = null;
                 //Crear la venta a partir del diccionario producto-cantidad
@@ -325,6 +342,23 @@ public class CreateVenta extends JFrame {
                 //Guardar Venta en el historial.
                 historial.agregarVenta(venta); // --> Guardar en la BD
                 System.out.println("Se registro la venta");
+                
+                model.setRowCount(0);
+				table.setModel(model);
+				
+                tfCantidad.setText("");
+                tfCode.setText("");
+                tfID.setText("");
+                tfNombre.setText("");
+                tfPrvent.setText("");
+                tfRowSelected.setText("");
+                tfStock.setText("");
+                tfTotalVenta.setText("");
+                comboBoxClients.setSelectedIndex(0);
+                comboBoxItems.setSelectedIndex(0);
+                model.setRowCount(0);
+				table.setModel(model);
+				JOptionPane.showMessageDialog(null, "Venta Guardada");
 				
 				
 			}
@@ -351,6 +385,7 @@ public class CreateVenta extends JFrame {
 		});
 		
 		JLabel lblStockDisponible = new JLabel("Stock Disponible");
+		lblStockDisponible.setFont(new Font("Yu Gothic UI", Font.BOLD, 12));
 		
 		tfStock = new JTextField();
 		tfStock.setEditable(false);
@@ -393,8 +428,8 @@ public class CreateVenta extends JFrame {
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
 							.addGroup(gl_contentPane.createSequentialGroup()
 								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 									.addGroup(gl_contentPane.createSequentialGroup()
@@ -404,11 +439,11 @@ public class CreateVenta extends JFrame {
 												.addPreferredGap(ComponentPlacement.RELATED)
 												.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 													.addGroup(gl_contentPane.createSequentialGroup()
-														.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
+														.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
 															.addComponent(lblId, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 															.addComponent(lblNombre_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-															.addComponent(lblPrecioVenta, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 104, GroupLayout.PREFERRED_SIZE))
-														.addPreferredGap(ComponentPlacement.UNRELATED, 17, Short.MAX_VALUE)
+															.addComponent(lblPrecioVenta, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE))
+														.addPreferredGap(ComponentPlacement.UNRELATED)
 														.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
 															.addComponent(tfID)
 															.addComponent(tfNombre)
@@ -418,71 +453,68 @@ public class CreateVenta extends JFrame {
 														.addPreferredGap(ComponentPlacement.RELATED)
 														.addComponent(tfCode, 147, 147, 147))))
 											.addGroup(gl_contentPane.createSequentialGroup()
-												.addGap(79)
-												.addComponent(lblInserteProducto))
-											.addGroup(gl_contentPane.createSequentialGroup()
 												.addComponent(lblNombre, GroupLayout.PREFERRED_SIZE, 91, GroupLayout.PREFERRED_SIZE)
 												.addGap(37)
-												.addComponent(btnBuscar, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))))
+												.addComponent(btnBuscar, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))
+											.addGroup(gl_contentPane.createSequentialGroup()
+												.addGap(79)
+												.addComponent(lblInserteProducto, GroupLayout.PREFERRED_SIZE, 122, GroupLayout.PREFERRED_SIZE))))
 									.addGroup(gl_contentPane.createSequentialGroup()
 										.addContainerGap()
 										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 											.addComponent(lblStockDisponible, GroupLayout.PREFERRED_SIZE, 104, GroupLayout.PREFERRED_SIZE)
 											.addComponent(lblCantidad, GroupLayout.PREFERRED_SIZE, 104, GroupLayout.PREFERRED_SIZE))
-										.addGap(28)
+										.addGap(18)
 										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 											.addComponent(tfCantidad, GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
-											.addComponent(tfStock, GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE))))
-								.addGap(3))
+											.addComponent(tfStock, GroupLayout.DEFAULT_SIZE, 542, Short.MAX_VALUE))))
+								.addPreferredGap(ComponentPlacement.RELATED))
 							.addGroup(gl_contentPane.createSequentialGroup()
-								.addGap(81)
-								.addComponent(btnAgregar, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(ComponentPlacement.RELATED)))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(comboBoxItems, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
-							.addGap(34)))
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addContainerGap()
+								.addComponent(comboBoxItems, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
+								.addGap(34)))
 						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
-							.addGap(18)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addGap(18)
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-										.addComponent(lblLista, GroupLayout.PREFERRED_SIZE, 88, GroupLayout.PREFERRED_SIZE)
+							.addContainerGap()
+							.addComponent(btnAgregar, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+							.addGap(72)))
+					.addGap(36)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addComponent(lblLista, GroupLayout.PREFERRED_SIZE, 88, GroupLayout.PREFERRED_SIZE)
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
+							.addComponent(scrollPane, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 499, GroupLayout.PREFERRED_SIZE)
+							.addGroup(Alignment.LEADING, gl_contentPane.createSequentialGroup()
+								.addGap(10)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+									.addGroup(gl_contentPane.createSequentialGroup()
+										.addComponent(tfRowSelected, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.UNRELATED)
+										.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(lbl_random, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, 110, GroupLayout.PREFERRED_SIZE)
+										.addGap(29))
+									.addGroup(gl_contentPane.createSequentialGroup()
 										.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING, false)
-											.addGroup(gl_contentPane.createSequentialGroup()
-												.addGap(10)
-												.addComponent(tfRowSelected, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+											.addGroup(Alignment.LEADING, gl_contentPane.createSequentialGroup()
+												.addComponent(lblCc, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)
 												.addPreferredGap(ComponentPlacement.UNRELATED)
-												.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
-												.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-												.addComponent(lbl_random, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
-												.addGap(18)
-												.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, 110, GroupLayout.PREFERRED_SIZE))
-											.addComponent(scrollPane, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 499, GroupLayout.PREFERRED_SIZE))))
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addGap(36)
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-										.addComponent(lblCc, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblCliente, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE))
-									.addGap(18)
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-										.addComponent(textClientName, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
-										.addComponent(textClienteCC, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))))
-							.addGap(17))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGap(68)
-							.addComponent(comboBoxClients, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, 112, Short.MAX_VALUE)
-							.addComponent(btnVender, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
-							.addGap(55))))
+												.addComponent(textClienteCC))
+											.addGroup(Alignment.LEADING, gl_contentPane.createSequentialGroup()
+												.addComponent(lblCliente, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.UNRELATED)
+												.addComponent(textClientName))
+											.addComponent(comboBoxClients, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 196, GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED, 127, Short.MAX_VALUE)
+										.addComponent(btnVender, GroupLayout.PREFERRED_SIZE, 121, GroupLayout.PREFERRED_SIZE)
+										.addGap(45))))))
+					.addGap(17))
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
 						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
 								.addGroup(gl_contentPane.createSequentialGroup()
@@ -517,11 +549,13 @@ public class CreateVenta extends JFrame {
 										.addComponent(lblStockDisponible)
 										.addComponent(tfStock, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 									.addPreferredGap(ComponentPlacement.UNRELATED)
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 										.addComponent(lblCantidad)
 										.addComponent(tfCantidad, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-									.addGap(18))
-								.addGroup(gl_contentPane.createSequentialGroup()
+									.addGap(18)
+									.addComponent(btnAgregar)
+									.addPreferredGap(ComponentPlacement.RELATED))
+								.addGroup(Alignment.LEADING, gl_contentPane.createSequentialGroup()
 									.addComponent(lblLista)
 									.addGap(7)
 									.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
@@ -529,31 +563,24 @@ public class CreateVenta extends JFrame {
 									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
 										.addComponent(tfRowSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(btnEliminar, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
-										.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lbl_random))
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+										.addComponent(lbl_random)
+										.addComponent(tfTotalVenta, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+									.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 										.addGroup(gl_contentPane.createSequentialGroup()
-											.addGap(26)
+											.addPreferredGap(ComponentPlacement.UNRELATED)
 											.addComponent(comboBoxClients, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-											.addGap(23))
-										.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
-											.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-											.addComponent(btnVender)
-											.addGap(9)))))
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
-									.addComponent(btnAgregar)
-									.addGap(20))
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addGap(26)
-									.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-										.addComponent(textClienteCC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblCc))))
-							.addGap(41))
-						.addGroup(Alignment.TRAILING, gl_contentPane.createSequentialGroup()
+											.addPreferredGap(ComponentPlacement.UNRELATED)
+											.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblCliente)
+												.addComponent(textClientName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+										.addGroup(gl_contentPane.createSequentialGroup()
+											.addGap(20)
+											.addComponent(btnVender)))))
+							.addGap(64))
+						.addGroup(gl_contentPane.createSequentialGroup()
 							.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(textClientName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblCliente))
+								.addComponent(lblCc)
+								.addComponent(textClienteCC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 							.addGap(75))))
 		);
 		

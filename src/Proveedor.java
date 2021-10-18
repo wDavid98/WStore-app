@@ -11,7 +11,7 @@ public class Proveedor
     private String Nombre;
     private int telefono;
     private String direccion;
-    private int NID;
+    private Integer NID;
 
     /**
      * Constructor for objects of class Proveedor
@@ -28,7 +28,7 @@ public class Proveedor
     //Métodos mutadores y de acceso para los atributos de clase
     public int getTelefono()
     {return  telefono;}
-    public int getNID()
+    public Integer getNID()
     {return NID;}
     public String getNombre()
     {return Nombre;}
